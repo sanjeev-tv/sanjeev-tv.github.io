@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Album Reviews
-permalink: /album_reviews/
+permalink: /album-reviews/
 ---
 
 
