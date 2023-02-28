@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Album Reviews
-permalink: /album-reviews/
+title: Music Blog
+permalink: /music/
 ---
 
 
