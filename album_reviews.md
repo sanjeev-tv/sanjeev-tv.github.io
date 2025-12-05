@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Music Blog
-permalink: /music/
+title: Thoughts
+permalink: /blog/
 ---
 
 
