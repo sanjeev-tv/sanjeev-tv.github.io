@@ -32,6 +32,9 @@ github_username:  sanjeev-tv
 
 # Build settings
 theme: minima
+header_pages:
+  - album_reviews.md
+  - projects.md
 plugins:
   - jekyll-feed
 

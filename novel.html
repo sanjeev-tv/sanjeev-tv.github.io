@@ -1,0 +1,150 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In the Emperor's Shadow | {{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/novel-reader.css' | relative_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Sign In Modal -->
+  <div id="auth-modal" class="modal">
+    <div class="modal-content auth-modal-content">
+      <h2>Welcome, Reader</h2>
+      <p>Sign in to highlight passages and leave comments.</p>
+      <form id="auth-form">
+        <label for="auth-name">Name</label>
+        <input type="text" id="auth-name" placeholder="Your name" required>
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </form>
+      <button class="btn btn-link" id="skip-auth">Read as guest</button>
+    </div>
+  </div>
+
+  <!-- Comment Modal -->
+  <div id="comment-modal" class="modal">
+    <div class="modal-content comment-modal-content">
+      <div class="modal-header">
+        <h3 id="comment-modal-title">Add Comment</h3>
+        <button class="modal-close" id="close-comment-modal">&times;</button>
+      </div>
+      <div id="comment-context" class="comment-context"></div>
+      <form id="comment-form">
+        <input type="hidden" id="comment-level">
+        <input type="hidden" id="comment-chapter">
+        <input type="hidden" id="comment-page">
+        <input type="hidden" id="comment-para">
+        <input type="hidden" id="comment-highlight-id">
+        <textarea id="comment-text" placeholder="Write your comment..." rows="4" required></textarea>
+        <button type="submit" class="btn btn-primary">Submit Comment</button>
+      </form>
+      <div id="existing-comments" class="existing-comments"></div>
+    </div>
+  </div>
+
+  <!-- Diff Modal -->
+  <div id="diff-modal" class="modal">
+    <div class="modal-content diff-modal-content">
+      <div class="modal-header">
+        <h3>Version Diff</h3>
+        <button class="modal-close" id="close-diff-modal">&times;</button>
+      </div>
+      <div class="diff-controls">
+        <label>Compare current with:
+          <select id="diff-version-select"></select>
+        </label>
+        <label>Scope:
+          <select id="diff-scope-select">
+            <option value="page">Current Page</option>
+            <option value="chapter">Current Chapter</option>
+          </select>
+        </label>
+        <button class="btn btn-secondary" id="run-diff">Show Diff</button>
+      </div>
+      <div id="diff-output" class="diff-output"></div>
+    </div>
+  </div>
+
+  <!-- Highlight Toolbar (appears on text selection) -->
+  <div id="highlight-toolbar" class="highlight-toolbar">
+    <button id="hl-btn-highlight" title="Highlight"><span class="hl-icon">&#9998;</span> Highlight</button>
+    <button id="hl-btn-comment" title="Comment"><span class="hl-icon">&#128172;</span> Comment</button>
+  </div>
+
+  <!-- Top Bar -->
+  <header class="reader-header">
+    <div class="header-left">
+      <a href="{{ '/' | relative_url }}" class="back-link">&larr; Back</a>
+      <span class="header-title">In the Emperor's Shadow</span>
+    </div>
+<div class="header-right">
+      <div class="text-size-controls">
+        <button class="toolbar-btn text-size-btn text-size-sm" id="btn-size-down" title="Decrease text size">A</button>
+        <button class="toolbar-btn text-size-btn text-size-lg" id="btn-size-up" title="Increase text size">A</button>
+      </div>
+      <button class="toolbar-btn" id="btn-toc" title="Table of Contents">Index</button>
+      <button class="toolbar-btn" id="btn-comments" title="View Comments">Comments</button>
+      <button class="toolbar-btn" id="btn-diff" title="Version Diff">Diff</button>
+      <button class="toolbar-btn" id="btn-user" title="User"></button>
+    </div>
+  </header>
+
+  <!-- Reader -->
+  <main class="reader-main">
+    <button class="nav-arrow nav-arrow-left" id="nav-prev" title="Previous page">&lsaquo;</button>
+
+    <div class="book-container">
+      <div class="page page-left" id="page-left">
+        <div class="page-header"><span class="page-chapter"></span><span class="page-num"></span></div>
+        <div class="page-content"></div>
+      </div>
+      <div class="page-spine"></div>
+      <div class="page page-right" id="page-right">
+        <div class="page-header"><span class="page-chapter"></span><span class="page-num"></span></div>
+        <div class="page-content"></div>
+      </div>
+    </div>
+
+    <button class="nav-arrow nav-arrow-right" id="nav-next" title="Next page">&rsaquo;</button>
+  </main>
+
+  <!-- Page indicator + progress bar -->
+  <footer class="reader-footer">
+    <span id="page-indicator"></span>
+  </footer>
+  <div class="progress-bar-track"><div id="progress-bar" class="progress-bar-fill"></div></div>
+
+  <!-- TOC Sidebar -->
+  <aside id="toc-sidebar" class="toc-sidebar">
+    <div class="sidebar-header">
+      <h3>Index</h3>
+      <button class="modal-close" id="close-toc-sidebar">&times;</button>
+    </div>
+    <div id="toc-list" class="toc-list"></div>
+  </aside>
+
+  <!-- Comments Sidebar -->
+  <aside id="comments-sidebar" class="comments-sidebar">
+    <div class="sidebar-header">
+      <h3>Comments</h3>
+      <button class="modal-close" id="close-comments-sidebar">&times;</button>
+    </div>
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" data-scope="page">Page</button>
+      <button class="sidebar-tab" data-scope="chapter">Chapter</button>
+      <button class="sidebar-tab" data-scope="novel">Novel</button>
+    </div>
+    <div id="sidebar-comments-list" class="sidebar-comments-list"></div>
+    <button class="btn btn-primary sidebar-add-comment" id="sidebar-add-comment">Add Comment</button>
+  </aside>
+
+  <script src="{{ '/assets/js/md-parser.js' | relative_url }}"></script>
+  <script src="{{ '/assets/js/novel-reader.js' | relative_url }}"></script>
+</body>
+</html>

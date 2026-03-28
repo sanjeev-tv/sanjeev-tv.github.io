@@ -1,0 +1,329 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | In the Emperor's Shadow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    #auth-gate {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #111114;
+      color: #e0dcd4;
+      z-index: 1000;
+    }
+    #auth-gate form {
+      background: #1a1a1e;
+      border: 1px solid #2a2a2e;
+      border-radius: 8px;
+      padding: 32px;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #auth-gate h2 { font-size: 18px; margin-bottom: 4px; }
+    #auth-gate p { font-size: 13px; color: #6b6360; }
+    #auth-gate input {
+      padding: 10px 12px;
+      background: #111114;
+      border: 1px solid #2a2a2e;
+      border-radius: 4px;
+      color: #e0dcd4;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    #auth-gate button {
+      padding: 10px;
+      background: #8b6914;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    #auth-error { color: #c44; font-size: 13px; display: none; }
+    #admin-content { display: none; }
+    :root {
+      --bg: #111114;
+      --card: #1a1a1e;
+      --border: #2a2a2e;
+      --text: #e0dcd4;
+      --muted: #6b6360;
+      --accent: #c4a04a;
+      --hl-bg: rgba(200, 170, 60, 0.2);
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 24px; margin-bottom: 4px; }
+    .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+    a { color: var(--accent); }
+    h2 { font-size: 18px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .section { margin-bottom: 40px; }
+    .empty { color: var(--muted); font-style: italic; font-size: 14px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .card-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .card-meta strong { color: var(--accent); }
+    .card-text { font-size: 14px; line-height: 1.5; }
+    .card-highlight {
+      background: var(--hl-bg);
+      border-left: 3px solid var(--accent);
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-style: italic;
+      font-size: 13px;
+      border-radius: 0 4px 4px 0;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 600; color: var(--accent); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .export-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .export-btn:hover { background: #2a2a2e; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+    .note {
+      background: rgba(200, 170, 60, 0.1);
+      border: 1px solid rgba(200, 170, 60, 0.3);
+      border-radius: 6px;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .note strong { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Gate -->
+  <div id="auth-gate">
+    <form id="auth-gate-form">
+      <h2>Admin Access</h2>
+      <p>Enter your admin password to continue.</p>
+      <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password" required>
+      <button type="submit">Sign In</button>
+      <span id="auth-error">Incorrect password.</span>
+    </form>
+  </div>
+
+  <!-- Admin Content (shown after auth) -->
+  <div id="admin-content">
+  <h1>Admin Dashboard</h1>
+  <p class="subtitle"><a href="{{ '/' | relative_url }}">&larr; Home</a> &middot; <a href="{{ '/novel.html' | relative_url }}">Open Reader</a></p>
+
+  <div class="note">
+    <strong>Note:</strong> This dashboard shows highlights and comments stored in your browser's localStorage.
+    Since this is a static site, each user's data is stored locally on their device.
+    To aggregate data from multiple users, consider adding a backend service (e.g., Firebase Firestore)
+    or have users export their data using the button below.
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <button class="export-btn" id="export-json">Export All Data (JSON)</button>
+    <button class="export-btn" id="import-json">Import Data (JSON)</button>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+  </div>
+
+  <div class="section">
+    <h2>Highlights</h2>
+    <div id="highlights-list"></div>
+  </div>
+
+  <div class="section">
+    <h2>Comments</h2>
+    <div id="comments-list"></div>
+  </div>
+
+  </div><!-- /admin-content -->
+
+  <script>
+    // SHA-256 of the admin password.
+    // To change: open browser console and run:
+    //   const h = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256',
+    //     new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+    //   h('your-new-password').then(console.log);
+    // Then paste the result as ADMIN_HASH below.
+    const ADMIN_HASH = '5846d60018319b9e79700f11a3e826117b1bc6d3fd974c7348b38e9d671816c0';
+
+    async function checkPassword(pw) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function unlock() {
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+      loadDashboard();
+    }
+
+    // Check sessionStorage for already-authenticated session
+    if (sessionStorage.getItem('novel_admin_authed') === ADMIN_HASH) {
+      unlock();
+    }
+
+    document.getElementById('auth-gate-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pw = document.getElementById('admin-password').value;
+      const hash = await checkPassword(pw);
+      if (hash === ADMIN_HASH) {
+        sessionStorage.setItem('novel_admin_authed', ADMIN_HASH);
+        unlock();
+      } else {
+        document.getElementById('auth-error').style.display = 'block';
+      }
+    });
+
+    function loadDashboard() {
+      const highlights = JSON.parse(localStorage.getItem('novel_highlights') || '[]');
+      const comments = JSON.parse(localStorage.getItem('novel_comments') || '[]');
+
+      // Stats
+      const uniqueUsers = new Set([
+        ...highlights.map(h => h.userId),
+        ...comments.map(c => c.userId)
+      ].filter(Boolean));
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card"><div class="stat-num">${highlights.length}</div><div class="stat-label">Highlights</div></div>
+        <div class="stat-card"><div class="stat-num">${comments.length}</div><div class="stat-label">Comments</div></div>
+        <div class="stat-card"><div class="stat-num">${uniqueUsers.size}</div><div class="stat-label">Unique Users</div></div>
+      `;
+
+      // Highlights
+      const hlList = document.getElementById('highlights-list');
+      if (highlights.length === 0) {
+        hlList.innerHTML = '<p class="empty">No highlights yet.</p>';
+      } else {
+        hlList.innerHTML = highlights.map(h => `
+          <div class="card">
+            <div class="card-meta"><strong>${esc(h.userName)}</strong> (${esc(h.userId)}) &middot; ${esc(h.chapterId)}, Para ${h.paraIdx} &middot; ${new Date(h.timestamp).toLocaleString()}</div>
+            <div class="card-highlight">\u201C${esc(h.text)}\u201D</div>
+          </div>
+        `).join('');
+      }
+
+      // Comments
+      const cmtList = document.getElementById('comments-list');
+      if (comments.length === 0) {
+        cmtList.innerHTML = '<p class="empty">No comments yet.</p>';
+      } else {
+        cmtList.innerHTML = comments.map(c => {
+          let context = '';
+          if (c.highlightId) {
+            const hl = highlights.find(h => h.id === c.highlightId);
+            if (hl) context = `<div class="card-highlight">\u201C${esc(hl.text.slice(0, 120))}${hl.text.length > 120 ? '...' : ''}\u201D</div>`;
+          }
+          const scope = c.level === 'novel' ? 'Novel-level' : c.level === 'chapter' ? `Chapter: ${c.chapterId}` : c.level === 'page' ? `Chapter: ${c.chapterId}` : `${c.chapterId}, Para ${c.paraIdx}`;
+          return `
+            <div class="card">
+              <div class="card-meta"><strong>${esc(c.userName)}</strong> (${esc(c.userId)}) &middot; ${scope} &middot; ${new Date(c.timestamp).toLocaleString()}</div>
+              ${context}
+              <div class="card-text">${esc(c.text)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Export
+      document.getElementById('export-json').addEventListener('click', () => {
+        const data = { highlights, comments, exportedAt: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'novel-feedback-' + new Date().toISOString().slice(0, 10) + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Import
+      document.getElementById('import-json').addEventListener('click', () => {
+        document.getElementById('import-file').click();
+      });
+      document.getElementById('import-file').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.highlights) {
+              const existing = JSON.parse(localStorage.getItem('novel_highlights') || '[]');
+              const ids = new Set(existing.map(h => h.id));
+              const newHl = data.highlights.filter(h => !ids.has(h.id));
+              localStorage.setItem('novel_highlights', JSON.stringify([...existing, ...newHl]));
+            }
+            if (data.comments) {
+              const existing = JSON.parse(localStorage.getItem('novel_comments') || '[]');
+              const ids = new Set(existing.map(c => c.id));
+              const newCmt = data.comments.filter(c => !ids.has(c.id));
+              localStorage.setItem('novel_comments', JSON.stringify([...existing, ...newCmt]));
+            }
+            alert('Data imported successfully. Refreshing...');
+            location.reload();
+          } catch (err) {
+            alert('Error importing data: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str || '';
+        return d.innerHTML;
+      }
+    } // end loadDashboard
+  </script>
+</body>
+</html>
