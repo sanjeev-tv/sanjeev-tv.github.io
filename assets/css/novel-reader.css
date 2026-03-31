@@ -185,10 +185,11 @@ html, body {
 }
 
 /* ===== Book Cover (single page width, covers right page, flips left) ===== */
-/* While book is closed: keep the left page's cream background visible
-   (so #book-frame's dark blue doesn't show through), but hide text content */
-.book-is-closed .page-left .page-header,
-.book-is-closed .page-left .page-content {
+/* While book is closed: hide the left page and spine entirely.
+   The dark #book-frame background shows through on the left half,
+   leaving only the front cover visible on the right. */
+.book-is-closed .page-left,
+.book-is-closed .page-spine {
   visibility: hidden;
 }
 

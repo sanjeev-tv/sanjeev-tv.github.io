@@ -44,9 +44,12 @@
         paginateContent();
         populateToc();
         const savedSpread = parseInt(localStorage.getItem(STORAGE_BOOKMARK) || '0');
-        if (savedSpread > 0 && savedSpread < totalSpreads()) currentSpread = savedSpread;
+        const targetSpread = (savedSpread > 0 && savedSpread < totalSpreads()) ? savedSpread : 0;
+        // Always render from spread 0 so the cover reveals the first page,
+        // then animate forward to the bookmark after the cover opens.
+        currentSpread = 0;
         renderSpread();
-        setTimeout(openBookCover, 500);
+        setTimeout(() => openBookCover(targetSpread), 1000);
       });
     });
 
@@ -751,7 +754,7 @@
   }
 
   // ---- Book Cover ----
-  function openBookCover() {
+  function openBookCover(targetSpread) {
     const cover = document.getElementById('book-cover');
     if (!cover) return;
     cover.classList.add('opening');
@@ -759,7 +762,75 @@
       cover.classList.add('hidden');
       const bc = document.querySelector('.book-container');
       if (bc) bc.classList.remove('book-is-closed');
+      if (targetSpread > 0) {
+        setTimeout(() => animateToBookmark(targetSpread), 350);
+      }
     }, { once: true });
+  }
+
+  // Rapidly flip pages from spread 0 to targetSpread, giving the illusion of
+  // a physical book opening to the reader's last saved position.
+  function animateToBookmark(targetSpread) {
+    if (targetSpread <= 0 || targetSpread >= totalSpreads()) return;
+
+    isAnimating = true;
+
+    const MAX_SHOWN = 5;   // max individual visible flips regardless of distance
+    const FLIP_MS   = 190; // duration for most flips
+    const LAST_MS   = 340; // slower final flip so the landing feels deliberate
+
+    // If the target is far away, silently jump most of the way first
+    if (targetSpread > MAX_SHOWN) {
+      currentSpread = targetSpread - MAX_SHOWN;
+      renderSpread();
+    }
+
+    let remaining = Math.min(targetSpread, MAX_SHOWN);
+
+    function doFlip() {
+      if (remaining <= 0) { isAnimating = false; return; }
+      remaining--;
+      const isLast = remaining === 0;
+
+      const container = $('.book-container');
+      const overlay = document.createElement('div');
+      overlay.className = 'page-flip-overlay flip-forward';
+      overlay.style.animationDuration = (isLast ? LAST_MS : FLIP_MS) + 'ms';
+
+      if (!isMobile) {
+        // Front face: snapshot of the current right page (departing)
+        const rp = $('#page-right');
+        const front = document.createElement('div');
+        front.className = 'flip-face flip-front';
+        front.innerHTML =
+          '<div class="page-header">' + rp.querySelector('.page-header').innerHTML + '</div>' +
+          '<div class="page-content">' + rp.querySelector('.page-content').innerHTML + '</div>';
+        overlay.appendChild(front);
+      }
+
+      container.appendChild(overlay);
+      currentSpread++;
+      renderSpread();
+
+      if (!isMobile) {
+        // Back face: snapshot of the newly arrived left page
+        const lp = $('#page-left');
+        const back = document.createElement('div');
+        back.className = 'flip-face flip-back';
+        back.innerHTML =
+          '<div class="page-header">' + lp.querySelector('.page-header').innerHTML + '</div>' +
+          '<div class="page-content">' + lp.querySelector('.page-content').innerHTML + '</div>';
+        overlay.appendChild(back);
+      }
+
+      overlay.addEventListener('animationend', function () {
+        overlay.remove();
+        if (remaining > 0) setTimeout(doFlip, 25);
+        else isAnimating = false;
+      }, { once: true });
+    }
+
+    doFlip();
   }
 
   // ---- Page Stacks ----
