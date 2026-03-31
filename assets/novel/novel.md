@@ -7,7 +7,7 @@
 Benedor knew well the omens that would herald the fall of his empire.
 
 
-The first of the three signs would be a red moon, staining  the starry night like freshly spilled blood. Then the Lifetree would burn, its golden fruits aflame with the fires of Hell. Finally, a black void would open up, and his Maker would call him home.
+Three signs there would be. First a red moon would stain the starry night like freshly spilled blood. Then the Lifetree would burn, and its golden fruits would ignite with the fires of Hell. Finally, a black void would open up, and his Maker would call him home.
 
 
 Long ago had he dreamt these signs and long ago had he overcome his fear of them. He was a God, after all. It was golden ichor that coursed through his veins, not the red blood of mortals.
