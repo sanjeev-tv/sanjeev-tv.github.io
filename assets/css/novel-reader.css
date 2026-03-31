@@ -831,64 +831,148 @@ html, body {
   border-radius: 3px;
 }
 
-/* ===== Mobile (single page) ===== */
+/* ===== Mobile Reader Mode (class added by JS on isMobile) ===== */
+/* Default reading state: hide all chrome, page fills viewport */
+body.mobile-reader .reader-header,
+body.mobile-reader .reader-footer,
+body.mobile-reader .progress-bar-track,
+body.mobile-reader .nav-arrow,
+body.mobile-reader #stack-left,
+body.mobile-reader #stack-right,
+body.mobile-reader .page-spine {
+  display: none !important;
+}
+
+/* Cover is a full-screen splash on mobile — faded out by JS after 1.5s */
+body.mobile-reader #book-cover {
+  position: fixed;
+  inset: 0;
+  left: 0; right: 0; top: 0; bottom: 0;
+  border-radius: 0;
+  box-shadow: none;
+  z-index: 200;
+  transform: none !important;
+}
+
+/* Remove flex centering from reader-main so #book-frame fills width as a block child */
+body.mobile-reader .reader-main {
+  display: block;
+  padding: 0;
+}
+
+/* Give #book-frame explicit full-viewport dimensions on mobile */
+body.mobile-reader #book-frame {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--page-bg) !important;
+}
+
+/* Mobile bottom chrome: hidden initially, slides up when chrome-visible */
+.mobile-bottom-chrome {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 110;
+  background: rgba(17, 17, 20, 0.96);
+  padding: 12px 20px max(16px, env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+  border-top: 1px solid #2a2a2e;
+}
+body.mobile-reader .mobile-bottom-chrome {
+  display: block;
+}
+
+/* Chrome-visible: slide header down from top, bottom bar up from bottom */
+body.mobile-reader.chrome-visible .reader-header {
+  display: flex !important;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 110;
+  animation: chrome-slide-down 0.2s ease forwards;
+}
+body.mobile-reader.chrome-visible .mobile-bottom-chrome {
+  transform: translateY(0);
+  animation: chrome-slide-up 0.2s ease forwards;
+}
+@keyframes chrome-slide-down {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes chrome-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Mobile progress slider */
+.mobile-progress-row {
+  display: flex;
+  align-items: center;
+}
+.mobile-progress-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  outline: none;
+}
+.mobile-progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  cursor: pointer;
+}
+.mobile-progress-slider::-moz-range-thumb {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: none; cursor: pointer;
+}
+.mobile-page-indicator {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-family: var(--sans);
+}
+
+/* ===== Mobile layout ===== */
 @media (max-width: 768px) {
-  .reader-header {
-    padding: 0 8px;
-  }
-  .header-title {
-    font-size: 16px;
-  }
-  .header-center {
-    display: none;
+  /* Full viewport reading area — no padding */
+  .reader-main {
+    padding: 0;
+    height: 100vh;
+    height: 100dvh;
   }
 
   .book-container {
     max-width: 100%;
     max-height: 100%;
+    height: 100%;
+    border-radius: 0;
   }
 
-  #book-frame {
-    border-radius: 4px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  /* Single reading page: Kindle/iBooks-style margins */
+  .page-right {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 40px 28px;
   }
 
-  #stack-left, #stack-right { display: none; }
-
-  /* On mobile the cover fills the single visible page */
-  #book-cover {
-    left: -12px;
-    right: -12px;
-    border-radius: 4px;
-  }
-
-  .cover-title { font-size: 18px; }
-  .cover-author { font-size: 11px; }
-
+  /* Keep hidden-mobile working for page-left / spine */
   .page-left.hidden-mobile,
   .page-spine.hidden-mobile {
     display: none;
   }
 
-  .page-right {
-    border-radius: 4px;
-    background: var(--page-bg);
-  }
-
-  .page {
-    padding: 20px 24px;
-  }
-
-  .nav-arrow {
-    width: 36px;
-    height: 60px;
-    font-size: 28px;
-  }
-  .nav-arrow-left { left: 2px; }
-  .nav-arrow-right { right: 2px; }
-
-  .reader-main {
-    padding: 8px;
+  /* Header when shown as overlay */
+  .reader-header {
+    padding: 0 12px;
   }
 
   .toolbar-btn {
@@ -906,30 +990,14 @@ html, body {
     padding: 5px 8px;
   }
 
-  /* Mobile: slide instead of 3D flip */
-  .page-flip-overlay.flip-forward {
-    left: 0;
-    width: 100%;
-    border-radius: 4px;
-    background: var(--page-bg);
-    transform-origin: center;
-    animation: mobile-slide-forward 0.3s ease-out forwards;
+  /* Page slide-in animations (applied directly to #page-right by JS) */
+  @keyframes mobile-page-in-right {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
   }
-  .page-flip-overlay.flip-backward {
-    left: 0;
-    width: 100%;
-    border-radius: 4px;
-    background: var(--page-bg);
-    transform-origin: center;
-    animation: mobile-slide-backward 0.3s ease-out forwards;
-  }
-  @keyframes mobile-slide-forward {
-    0%   { transform: translateX(0); opacity: 1; }
-    100% { transform: translateX(-100%); opacity: 0; }
-  }
-  @keyframes mobile-slide-backward {
-    0%   { transform: translateX(0); opacity: 1; }
-    100% { transform: translateX(100%); opacity: 0; }
+  @keyframes mobile-page-in-left {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
   }
 }
 

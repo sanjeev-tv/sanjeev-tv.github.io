@@ -10,7 +10,7 @@
   const STORAGE_HL       = 'novel_highlights';
   const STORAGE_CMT      = 'novel_comments';
   const STORAGE_SIZE     = 'novel_text_size';
-  const STORAGE_BOOKMARK = 'novel_bookmark';
+  const STORAGE_BOOKMARK = window.NOVEL_FORCE_MOBILE ? 'novel_bookmark_mobile' : 'novel_bookmark';
   let currentUser       = null;
   let editingCommentId  = null;
   let allBlocks         = [];
@@ -21,6 +21,8 @@
   let comments       = [];
   let isAnimating    = false;
   let textSize       = 16;
+  let isChromeVisible = false;
+  let chromeHideTimer = null;
 
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
@@ -57,9 +59,10 @@
     // layout is fully committed before we measure page heights and paginate.
     document.fonts.ready.then(() => {
       requestAnimationFrame(() => {
-        repaginateAfterFontLoad();
-        // Always open the cover on first load
+        // Read bookmark BEFORE repaginateAfterFontLoad — that fn calls renderSpread()
+        // which overwrites localStorage with currentSpread=0, clobbering the saved position.
         const savedSpread = parseInt(localStorage.getItem(STORAGE_BOOKMARK) || '0');
+        repaginateAfterFontLoad();
         const targetSpread = (savedSpread > 0 && savedSpread < totalSpreads()) ? savedSpread : 0;
         setTimeout(() => {
           openBookCover(targetSpread);
@@ -183,21 +186,29 @@
     const refPage = isMobile ? $('#page-right') : $('#page-left');
     if (!refPage) return;
 
-    // Read page padding from CSS (reliable — these are CSS property values, not layout geometry)
     const refStyle = getComputedStyle(refPage);
-    const padH = parseFloat(refStyle.paddingLeft)  + parseFloat(refStyle.paddingRight);
-    const padV = parseFloat(refStyle.paddingTop)   + parseFloat(refStyle.paddingBottom);
+    // On mobile, hardcode padding to match .page-right { padding: 40px 28px } so we
+    // never get the wrong value from getComputedStyle timing issues.
+    // On mobile, hardcode padding to match .page-right { padding: 40px 28px } so we
+    // never get the wrong value from getComputedStyle timing issues.
+    const padH = isMobile
+      ? 56 // 28px left + 28px right
+      : parseFloat(refStyle.paddingLeft) + parseFloat(refStyle.paddingRight);
 
-    // refPage.offsetWidth can be wrong on initial load: the width:100% chain through
-    // .book-container → #book-frame (which has no explicit width) creates a circular
-    // dependency that some browsers resolve to a tiny value before the first committed
-    // layout.  Use it only when it looks plausible; otherwise derive from window.innerWidth.
-    let pageWidth = refPage.offsetWidth;
-    if (pageWidth < 200) {
-      // .book-container { max-width:900px } inside .reader-main { padding:16px }
-      // Two pages share the container, separated only by the 4px .page-spine.
-      const containerW = Math.min(900, window.innerWidth - 32);
-      pageWidth = isMobile ? containerW : Math.floor((containerW - 4) / 2);
+    // On mobile the page always fills the full viewport width — use window.innerWidth
+    // directly so pagination is correct regardless of DOM layout timing.
+    // On desktop, use the measured width with a sensible fallback.
+    let pageWidth;
+    if (isMobile) {
+      pageWidth = window.innerWidth;
+    } else {
+      pageWidth = refPage.offsetWidth;
+      if (pageWidth < 200) {
+        // .book-container { max-width:900px } inside .reader-main { padding:16px }
+        // Two pages share the container, separated only by the 4px .page-spine.
+        const containerW = Math.min(900, window.innerWidth - 32);
+        pageWidth = Math.floor((containerW - 4) / 2);
+      }
     }
     const contentWidth = Math.max(150, pageWidth - padH);
 
@@ -434,7 +445,27 @@
   }
 
   function detectMobile() {
+    if (window.NOVEL_FORCE_MOBILE) {
+      isMobile = true;
+      document.body.classList.add('mobile-reader');
+      return;
+    }
+    if (window.NOVEL_FORCE_DESKTOP) {
+      isMobile = false;
+      document.body.classList.remove('mobile-reader');
+      document.body.classList.remove('chrome-visible');
+      isChromeVisible = false;
+      return;
+    }
+    // Auto-detect fallback
     isMobile = window.innerWidth <= 768 || window.innerHeight > window.innerWidth;
+    if (isMobile) {
+      document.body.classList.add('mobile-reader');
+    } else {
+      document.body.classList.remove('mobile-reader');
+      document.body.classList.remove('chrome-visible');
+      isChromeVisible = false;
+    }
   }
 
   // ---- Text Size ----
@@ -443,7 +474,7 @@
       const saved = localStorage.getItem(STORAGE_SIZE);
       if (saved) textSize = parseInt(saved);
     } catch (e) { /* ignore */ }
-    textSize = Math.max(12, Math.min(22, textSize || 16));
+    textSize = Math.max(12, Math.min(22, textSize || (window.NOVEL_FORCE_MOBILE ? 20 : 16)));
     applyTextSize();
   }
 
@@ -518,6 +549,22 @@
     if (newSpread === currentSpread || isAnimating) return;
 
     const direction = newSpread > currentSpread ? 'forward' : 'backward';
+
+    // Mobile: instant render + CSS slide-in, no overlay needed
+    if (isMobile) {
+      currentSpread = newSpread;
+      renderSpread();
+      const pageEl = document.getElementById('page-right');
+      if (pageEl) {
+        pageEl.style.animation = 'none';
+        void pageEl.offsetHeight; // trigger reflow
+        pageEl.style.animation = direction === 'forward'
+          ? 'mobile-page-in-right 0.18s ease-out'
+          : 'mobile-page-in-left 0.18s ease-out';
+      }
+      return;
+    }
+
     const container = $('.book-container');
     isAnimating = true;
 
@@ -614,6 +661,20 @@
     updateTocHighlight();
     updatePageStacks();
     localStorage.setItem(STORAGE_BOOKMARK, String(currentSpread));
+    if (isMobile) updateMobileChrome();
+  }
+
+  function updateMobileChrome() {
+    const total = totalSpreads();
+    const pp = pagesPerSpread();
+    const pages = paginatedPages.slice(currentSpread * pp, currentSpread * pp + pp);
+    const pageNum = pages[0] ? pages[0].pageNum : 1;
+    const totalPages = paginatedPages.length;
+
+    const slider = document.getElementById('mobile-progress-slider');
+    const indicator = document.getElementById('mobile-page-indicator');
+    if (slider) { slider.max = String(total - 1); slider.value = String(currentSpread); }
+    if (indicator) { indicator.textContent = 'Page ' + pageNum + ' of ' + totalPages; }
   }
 
   function renderPage(el, pageData, side) {
@@ -840,21 +901,56 @@
   function openBookCover(targetSpread) {
     const cover = document.getElementById('book-cover');
     if (!cover) return;
+
+    if (isMobile) {
+      const bc = document.querySelector('.book-container');
+      if (bc) bc.classList.remove('book-is-closed');
+      // Pre-render the bookmarked page behind the cover
+      if (targetSpread > 0) {
+        currentSpread = Math.min(targetSpread, totalSpreads() - 1);
+      }
+      renderSpread();
+      // Show cover briefly, then fade it out
+      setTimeout(() => {
+        cover.style.transition = 'opacity 0.3s ease';
+        cover.style.opacity = '0';
+        cover.addEventListener('transitionend', () => {
+          if (cover.parentNode) cover.parentNode.removeChild(cover);
+        }, { once: true });
+      }, 500);
+      return;
+    }
+
+    // Desktop: 3D cover-open animation
     cover.classList.add('opening');
     cover.addEventListener('animationend', function () {
       cover.classList.add('hidden');
       cover.classList.remove('opening');
       const bc = document.querySelector('.book-container');
       if (bc) bc.classList.remove('book-is-closed');
-      // Remove the cover element from the DOM after hiding
       setTimeout(() => {
         if (cover.parentNode) cover.parentNode.removeChild(cover);
       }, 100);
-      // Always hide the cover after animation, even if targetSpread is 0
       if (targetSpread > 0) {
         setTimeout(() => animateToBookmark(targetSpread), 350);
       }
     }, { once: true });
+  }
+
+  // ---- Mobile Chrome Toggle ----
+  function showChrome() {
+    isChromeVisible = true;
+    document.body.classList.add('chrome-visible');
+    clearTimeout(chromeHideTimer);
+    chromeHideTimer = setTimeout(hideChrome, 3000);
+  }
+  function hideChrome() {
+    isChromeVisible = false;
+    document.body.classList.remove('chrome-visible');
+    clearTimeout(chromeHideTimer);
+  }
+  function toggleChrome() {
+    if (isChromeVisible) hideChrome(); else showChrome();
   }
 
   // Rapidly flip pages from spread 0 to targetSpread, giving the illusion of
@@ -1241,14 +1337,49 @@
       modal.addEventListener('click', (e) => { if (e.target === modal && modal.id !== 'auth-modal') modal.classList.remove('visible'); });
     });
 
-    // Touch swipe
-    let touchStartX = 0;
+    // Mobile tap zones + swipe
+    let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
     const mainEl = $('.reader-main');
-    mainEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
-    mainEl.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(diff) > 60) { if (diff > 0) goToSpread(currentSpread - 1); else goToSpread(currentSpread + 1); }
+    mainEl.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
     }, { passive: true });
+
+    mainEl.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      const dt = Date.now() - touchStartTime;
+
+      // Swipe: >60px horizontal, <40px vertical, <400ms
+      if (Math.abs(dx) > 60 && Math.abs(dy) < 40 && dt < 400) {
+        if (dx > 0) goToSpread(currentSpread - 1); else goToSpread(currentSpread + 1);
+        return;
+      }
+
+      // Tap: barely moved, quick — mobile only
+      if (isMobile && Math.abs(dx) < 15 && Math.abs(dy) < 15 && dt < 300) {
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed) return; // text selected — don't navigate
+        const x = e.changedTouches[0].clientX;
+        const w = window.innerWidth;
+        if (x < w * 0.30) goToSpread(currentSpread - 1);
+        else if (x > w * 0.70) goToSpread(currentSpread + 1);
+        else toggleChrome();
+      }
+    }, { passive: true });
+
+    // Mobile progress slider
+    const mobileSlider = document.getElementById('mobile-progress-slider');
+    if (mobileSlider) {
+      mobileSlider.addEventListener('input', () => {
+        const target = parseInt(mobileSlider.value, 10);
+        if (!isNaN(target)) {
+          currentSpread = Math.max(0, Math.min(target, totalSpreads() - 1));
+          renderSpread();
+        }
+      });
+    }
   }
 
   // ---- Go ----

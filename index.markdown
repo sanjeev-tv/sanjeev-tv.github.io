@@ -60,6 +60,20 @@ layout: default
   text-decoration: none;
   color: #fff;
 }
+.read-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.read-btn-secondary {
+  background: transparent;
+  color: #8b6914;
+  border: 1px solid #8b6914;
+}
+.read-btn-secondary:hover {
+  background: rgba(139, 105, 20, 0.08);
+  color: #8b6914;
+}
 </style>
 
 <section class="home-section">
@@ -68,6 +82,9 @@ layout: default
     <h3>The Shattered Blade</h3>
     <p class="novel-byline">by Sanjeev Venkatesan</p>
     <p class="novel-blurb">{% include back-of-book.html %}</p>
-    <a href="/novel.html" class="read-btn">Read Now</a>
+    <div class="read-options">
+      <a href="/novel-mobile.html" class="read-btn">Read on Mobile</a>
+      <a href="/novel.html" class="read-btn read-btn-secondary">Read on Desktop</a>
+    </div>
   </div>
 </section>
