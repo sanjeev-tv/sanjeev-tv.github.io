@@ -65,7 +65,7 @@ layout: default
 <section class="home-section">
   <h2>Writing</h2>
   <div class="novel-card">
-    <h3>In the Emperor's Shadow</h3>
+    <h3>The Shattered Blade</h3>
     <p class="novel-byline">by Sanjeev Venkatesan</p>
     <p class="novel-blurb">{% include back-of-book.html %}</p>
     <a href="/novel.html" class="read-btn">Read Now</a>

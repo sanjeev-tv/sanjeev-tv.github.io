@@ -6,7 +6,7 @@
 (function () {
   // Metadata not in the markdown itself
   const META = {
-    title: "In the Emperor's Shadow",
+    title: "The Shattered Blade",
     author: "Sanjeev Venkatesan",
     repo: "sanjeev-tv/sanjeev-tv.github.io"
   };

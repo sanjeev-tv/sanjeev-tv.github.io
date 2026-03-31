@@ -49,7 +49,7 @@
         // then animate forward to the bookmark after the cover opens.
         currentSpread = 0;
         renderSpread();
-        setTimeout(() => openBookCover(targetSpread), 1000);
+        setTimeout(() => openBookCover(targetSpread), 500);
       });
     });
 
@@ -170,13 +170,19 @@
     hdrSizer.className = 'page-header';
     hdrSizer.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;';
     hdrSizer.style.width = contentWidth + 'px';
-    hdrSizer.innerHTML = '<span class="page-chapter">M</span><span class="page-num">0</span>';
+    hdrSizer.innerHTML = '<span class="page-chapter">M</span>';
     document.body.appendChild(hdrSizer);
     void hdrSizer.offsetHeight;
-    const hdrH = hdrSizer.offsetHeight || 28;
+    // offsetHeight excludes margin — add margin-bottom so rawMax reflects actual space used
+    const hdrMargin = parseFloat(getComputedStyle(hdrSizer).marginBottom) || 16;
+    const hdrH = (hdrSizer.offsetHeight || 28) + hdrMargin;
     document.body.removeChild(hdrSizer);
 
-    const maxHeight = Math.max(200, pageH - padV - hdrH);
+    // Snap to exact line grid so every page holds the same number of rows.
+    const lineH = textSize * 1.6;
+    const rawMax = Math.max(200, pageH - padV - hdrH);
+    const linesPerPage = Math.floor(rawMax / lineH);
+    const maxHeight = Math.max(lineH, linesPerPage * lineH);
 
     // Measurer: a bare .page-content div with height:auto and overflow:visible.
     // This avoids ALL flex-in-fixed-container height bugs (Chrome & Safari both fail
@@ -219,7 +225,7 @@
           } else {
             // Try to split the paragraph at a word boundary
             const split = (block.type === 'paragraph')
-              ? splitParagraphForPage(block, contentEl, maxHeight, textSize)
+              ? splitParagraphForPage(block, contentEl, maxHeight)
               : null;
             if (split) {
               pageBlocks.push(split.firstBlock);
@@ -251,22 +257,15 @@
 
   // Split a paragraph block so the first part fits on the current page.
   // Returns { firstBlock, restBlock } or null if no valid split exists.
-  function splitParagraphForPage(block, contentEl, maxHeight, tSize) {
-    const lineH = tSize * 1.6; // matches CSS line-height: 1.6
-    const minH = lineH * 2;    // require at least 2 lines on each side
-
-    // Remaining vertical space on this page
-    const usedH = contentEl.scrollHeight;
-    if (maxHeight - usedH < minH) return null;
-
+  function splitParagraphForPage(block, contentEl, maxHeight) {
     // Extract plain-text words for binary-search (inline HTML ≈ same word wrapping)
     const tmp = document.createElement('div');
     tmp.innerHTML = block.text;
     const words = (tmp.textContent || '').trim().split(/\s+/).filter(Boolean);
-    if (words.length < 6) return null; // too short to be worth splitting
+    if (words.length < 2) return null;
 
     // Binary search: largest N where first N words fit in remaining page space
-    let lo = 2, hi = words.length - 2, bestN = -1;
+    let lo = 1, hi = words.length - 1, bestN = -1;
     while (lo <= hi) {
       const mid = Math.floor((lo + hi) / 2);
       const testEl = document.createElement('p');
@@ -279,7 +278,7 @@
       else hi = mid - 1;
     }
 
-    if (bestN < 2 || words.length - bestN < 4) return null;
+    if (bestN < 1 || bestN >= words.length) return null;
 
     // Split the actual HTML at word boundary bestN
     const { firstHtml, restHtml } = splitHtmlAtWords(block.text, bestN);
@@ -351,6 +350,7 @@
 
     const p = document.createElement('p');
     if (block.isFirstInChapter) p.className = 'first-para-after-heading';
+    else if (block.isSplitContinuation) p.className = 'split-continuation';
     p.setAttribute('data-chapter', block.chapterId);
     p.setAttribute('data-para', String(block.paraIdx));
     if (!block.isSplitContinuation) p.id = 'p-' + block.chapterId + '-' + block.paraIdx;
@@ -464,7 +464,8 @@
       frontFace.className = 'flip-face flip-front';
       frontFace.innerHTML =
         '<div class="page-header">' + deptHeader + '</div>' +
-        '<div class="page-content">' + deptContent + '</div>';
+        '<div class="page-content">' + deptContent + '</div>' +
+        '<div class="page-footer">' + pageFooterHtml(departingEl) + '</div>';
       overlay.appendChild(frontFace);
     }
 
@@ -482,7 +483,8 @@
       backFace.className = 'flip-face flip-back';
       backFace.innerHTML =
         '<div class="page-header">' + arrvHeader + '</div>' +
-        '<div class="page-content">' + arrvContent + '</div>';
+        '<div class="page-content">' + arrvContent + '</div>' +
+        '<div class="page-footer">' + pageFooterHtml(arrivingEl) + '</div>';
       overlay.appendChild(backFace);
     }
 
@@ -516,13 +518,13 @@
     if (isMobile) {
       pageLeft.classList.add('hidden-mobile');
       spine.classList.add('hidden-mobile');
-      if (pages[0]) { renderPage(pageRight, pages[0]); pageRight.classList.remove('empty-page'); }
+      if (pages[0]) { renderPage(pageRight, pages[0], 'right'); pageRight.classList.remove('empty-page'); }
     } else {
       pageLeft.classList.remove('hidden-mobile');
       spine.classList.remove('hidden-mobile');
-      if (pages[0]) { renderPage(pageLeft, pages[0]); pageLeft.classList.remove('empty-page'); }
+      if (pages[0]) { renderPage(pageLeft, pages[0], 'left'); pageLeft.classList.remove('empty-page'); }
       else clearPage(pageLeft);
-      if (pages[1]) { renderPage(pageRight, pages[1]); pageRight.classList.remove('empty-page'); }
+      if (pages[1]) { renderPage(pageRight, pages[1], 'right'); pageRight.classList.remove('empty-page'); }
       else clearPage(pageRight);
     }
 
@@ -544,9 +546,15 @@
     localStorage.setItem(STORAGE_BOOKMARK, String(currentSpread));
   }
 
-  function renderPage(el, pageData) {
-    el.querySelector('.page-chapter').textContent = pageData.chapterTitle +
-      (pageData.chapterSubtitle ? ' \u2013 ' + pageData.chapterSubtitle : '');
+  function renderPage(el, pageData, side) {
+    const hasChapterStart = pageData.blocks.some(b => b.type === 'chapter-start');
+    let label = '';
+    if (!hasChapterStart) {
+      label = side === 'left'
+        ? pageData.chapterTitle
+        : (pageData.chapterSubtitle || pageData.chapterTitle);
+    }
+    el.querySelector('.page-chapter').textContent = label;
     el.querySelector('.page-num').textContent = pageData.pageNum;
 
     const content = el.querySelector('.page-content');
@@ -561,6 +569,11 @@
     el.querySelector('.page-num').textContent = '';
     el.querySelector('.page-content').innerHTML = '';
     el.classList.add('empty-page');
+  }
+
+  function pageFooterHtml(el) {
+    const f = el.querySelector('.page-footer');
+    return f ? f.innerHTML : '';
   }
 
   // ---- Highlights: resolved by text search across versions ----
@@ -775,9 +788,9 @@
 
     isAnimating = true;
 
-    const MAX_SHOWN = 5;   // max individual visible flips regardless of distance
-    const FLIP_MS   = 190; // duration for most flips
-    const LAST_MS   = 340; // slower final flip so the landing feels deliberate
+    const MAX_SHOWN = 3;    // max individual visible flips regardless of distance
+    const FIRST_MS  = 120;  // fastest flip (first one)
+    const LAST_MS   = 340;  // slowest flip (last one — deliberate landing)
 
     // If the target is far away, silently jump most of the way first
     if (targetSpread > MAX_SHOWN) {
@@ -785,17 +798,22 @@
       renderSpread();
     }
 
-    let remaining = Math.min(targetSpread, MAX_SHOWN);
+    const flips = Math.min(targetSpread, MAX_SHOWN);
+    let remaining = flips;
 
     function doFlip() {
       if (remaining <= 0) { isAnimating = false; return; }
       remaining--;
-      const isLast = remaining === 0;
+      // pos: 0 = first (fastest), flips-1 = last (slowest)
+      const pos = flips - 1 - remaining;
+      const duration = flips > 1
+        ? Math.round(FIRST_MS * Math.pow(LAST_MS / FIRST_MS, pos / (flips - 1)))
+        : LAST_MS;
 
       const container = $('.book-container');
       const overlay = document.createElement('div');
       overlay.className = 'page-flip-overlay flip-forward';
-      overlay.style.animationDuration = (isLast ? LAST_MS : FLIP_MS) + 'ms';
+      overlay.style.animationDuration = duration + 'ms';
 
       if (!isMobile) {
         // Front face: snapshot of the current right page (departing)
@@ -804,7 +822,8 @@
         front.className = 'flip-face flip-front';
         front.innerHTML =
           '<div class="page-header">' + rp.querySelector('.page-header').innerHTML + '</div>' +
-          '<div class="page-content">' + rp.querySelector('.page-content').innerHTML + '</div>';
+          '<div class="page-content">' + rp.querySelector('.page-content').innerHTML + '</div>' +
+          '<div class="page-footer">' + pageFooterHtml(rp) + '</div>';
         overlay.appendChild(front);
       }
 
@@ -819,7 +838,8 @@
         back.className = 'flip-face flip-back';
         back.innerHTML =
           '<div class="page-header">' + lp.querySelector('.page-header').innerHTML + '</div>' +
-          '<div class="page-content">' + lp.querySelector('.page-content').innerHTML + '</div>';
+          '<div class="page-content">' + lp.querySelector('.page-content').innerHTML + '</div>' +
+          '<div class="page-footer">' + pageFooterHtml(lp) + '</div>';
         overlay.appendChild(back);
       }
 
@@ -1054,6 +1074,13 @@
     // Navigation
     $('#nav-prev').addEventListener('click', () => goToSpread(currentSpread - 1));
     $('#nav-next').addEventListener('click', () => goToSpread(currentSpread + 1));
+
+    // Progress bar — click to jump to position
+    $('.progress-bar-track').addEventListener('click', (e) => {
+      const track = e.currentTarget;
+      const pct = e.offsetX / track.offsetWidth;
+      goToSpread(Math.round(pct * (totalSpreads() - 1)));
+    });
 
     document.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;

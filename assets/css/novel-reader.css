@@ -104,8 +104,8 @@ html, body {
   text-align: center;
   padding: 6px 4px !important;
 }
-.text-size-sm { font-size: 11px !important; }
-.text-size-lg { font-size: 17px !important; }
+.text-size-sm { font-size: 14px !important; }
+.text-size-lg { font-size: 14px !important; }
 
 /* ===== Reader Main ===== */
 .reader-main {
@@ -185,21 +185,32 @@ html, body {
 }
 
 /* ===== Book Cover (single page width, covers right page, flips left) ===== */
-/* While book is closed: hide the left page and spine entirely.
-   The dark #book-frame background shows through on the left half,
-   leaving only the front cover visible on the right. */
+/* While book is closed: hide the left page and spine. Force background to
+   black so only the cover (right half) is visible. */
 .book-is-closed .page-left,
 .book-is-closed .page-spine {
   visibility: hidden;
+}
+.book-container.book-is-closed { background: var(--bg); }
+#book-frame:has(.book-is-closed)  { background: var(--bg); }
+#book-frame:has(.book-is-closed) #stack-left,
+#book-frame:has(.book-is-closed) #stack-right { visibility: hidden; }
+
+/* Blue hardcover binding frame — visible once the cover has flipped open */
+#book-frame:not(:has(.book-is-closed)) {
+  box-shadow:
+    0 8px 48px rgba(0,0,0,0.6),
+    inset 0 0 0 1px rgba(255,255,255,0.06),
+    0 0 0 16px var(--cover-blue);
 }
 
 /* Right half: the actual front cover */
 #book-cover {
   position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: calc(50% + 2px);
-  right: -4px;
+  top: -8px;
+  bottom: -8px;
+  left: 50%;
+  right: -12px;
   z-index: 30;
   background:
     radial-gradient(ellipse at 30% 40%, #24508a 0%, transparent 60%),
@@ -215,7 +226,7 @@ html, body {
   box-shadow: inset -4px 0 16px rgba(0,0,0,0.4), 3px 0 16px rgba(0,0,0,0.5);
 }
 #book-cover.opening {
-  animation: cover-open 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: cover-open 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 #book-cover.hidden { display: none; }
 @keyframes cover-open {
@@ -299,14 +310,25 @@ html, body {
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--sans);
-  font-size: 11px;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-style: italic;
   color: var(--text-muted);
+  text-align: center;
   margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  letter-spacing: 0.04em;
+}
+
+.page-footer {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 .page-content {
@@ -343,7 +365,8 @@ html, body {
   text-align: justify;
   hyphens: auto;
 }
-.page-content p.first-para-after-heading {
+.page-content p.first-para-after-heading,
+.page-content p.split-continuation {
   text-indent: 0;
 }
 .page-content p.first-para-after-heading::first-letter {
@@ -399,7 +422,7 @@ html, body {
   color: var(--header-text);
   padding: 6px 12px;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 16px;
   font-family: var(--sans);
   cursor: pointer;
   white-space: nowrap;
@@ -425,9 +448,10 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 6px;
   background: rgba(255,255,255,0.06);
   z-index: 50;
+  cursor: pointer;
 }
 .progress-bar-fill {
   height: 100%;
@@ -572,7 +596,7 @@ html, body {
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 16px;
   cursor: pointer;
   margin-top: 12px;
   font-family: var(--sans);
@@ -681,7 +705,7 @@ html, body {
   flex-wrap: wrap;
 }
 .diff-controls label {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-muted);
   display: flex;
   flex-direction: column;
@@ -694,7 +718,7 @@ html, body {
   padding: 6px 10px;
   border-radius: 4px;
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .diff-output {
@@ -702,7 +726,7 @@ html, body {
   border-radius: 4px;
   padding: 16px;
   font-family: 'Courier New', monospace;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.6;
   max-height: 400px;
   overflow-y: auto;
@@ -768,7 +792,7 @@ html, body {
   border: none;
   color: var(--text-muted);
   padding: 10px;
-  font-size: 13px;
+  font-size: 16px;
   font-family: var(--sans);
   cursor: pointer;
   border-bottom: 2px solid transparent;
@@ -813,7 +837,7 @@ html, body {
     padding: 0 8px;
   }
   .header-title {
-    font-size: 13px;
+    font-size: 16px;
   }
   .header-center {
     display: none;
@@ -833,8 +857,8 @@ html, body {
 
   /* On mobile the cover fills the single visible page */
   #book-cover {
-    left: -4px;
-    right: -4px;
+    left: -12px;
+    right: -12px;
     border-radius: 4px;
   }
 
