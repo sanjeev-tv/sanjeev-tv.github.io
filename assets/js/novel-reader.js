@@ -6,12 +6,14 @@
   'use strict';
 
   // ---- State ----
-  const STORAGE_USER = 'novel_user';
-  const STORAGE_HL   = 'novel_highlights';
-  const STORAGE_CMT  = 'novel_comments';
-  const STORAGE_SIZE = 'novel_text_size';
-  let currentUser    = null;
-  let allBlocks      = [];
+  const STORAGE_USER     = 'novel_user';
+  const STORAGE_HL       = 'novel_highlights';
+  const STORAGE_CMT      = 'novel_comments';
+  const STORAGE_SIZE     = 'novel_text_size';
+  const STORAGE_BOOKMARK = 'novel_bookmark';
+  let currentUser       = null;
+  let editingCommentId  = null;
+  let allBlocks         = [];
   let paginatedPages = [];
   let currentSpread  = 0;
   let isMobile       = false;
@@ -35,11 +37,17 @@
     loadTextSize();
     bindEvents();
 
-    // Wait for fonts to load before measuring & paginating
+    // Wait for fonts to load, then defer to next frame so the flex
+    // layout is fully committed before we measure page heights.
     document.fonts.ready.then(() => {
-      paginateContent();
-      populateToc();
-      renderSpread();
+      requestAnimationFrame(() => {
+        paginateContent();
+        populateToc();
+        const savedSpread = parseInt(localStorage.getItem(STORAGE_BOOKMARK) || '0');
+        if (savedSpread > 0 && savedSpread < totalSpreads()) currentSpread = savedSpread;
+        renderSpread();
+        setTimeout(openBookCover, 500);
+      });
     });
 
     let resizeTimer;
@@ -53,6 +61,17 @@
         restoreFromAnchor(anchor);
         renderSpread();
       }, 250);
+    });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        const anchor = getAnchorBlock();
+        detectMobile();
+        paginateContent();
+        populateToc();
+        restoreFromAnchor(anchor);
+        renderSpread();
+      }, 300);
     });
   }
 
@@ -112,34 +131,74 @@
   // ---- Dynamic pagination ----
   function paginateContent() {
     const refPage = isMobile ? $('#page-right') : $('#page-left');
-    if (!refPage || refPage.offsetWidth === 0) return;
+    if (!refPage) return;
 
-    // Create off-screen measurer matching the real page exactly
-    const measurer = document.createElement('div');
-    measurer.className = 'page page-left';
-    measurer.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;';
-    measurer.style.width = refPage.offsetWidth + 'px';
-    measurer.style.height = refPage.offsetHeight + 'px';
-    measurer.innerHTML = '<div class="page-header"><span class="page-chapter">M</span><span class="page-num">0</span></div><div class="page-content"></div>';
-    document.body.appendChild(measurer);
+    // Read page padding from CSS (reliable — these are CSS property values, not layout geometry)
+    const refStyle = getComputedStyle(refPage);
+    const padH = parseFloat(refStyle.paddingLeft)  + parseFloat(refStyle.paddingRight);
+    const padV = parseFloat(refStyle.paddingTop)   + parseFloat(refStyle.paddingBottom);
 
-    const contentEl = measurer.querySelector('.page-content');
-    // Force font size to match current setting
+    // refPage.offsetWidth can be wrong on initial load: the width:100% chain through
+    // .book-container → #book-frame (which has no explicit width) creates a circular
+    // dependency that some browsers resolve to a tiny value before the first committed
+    // layout.  Use it only when it looks plausible; otherwise derive from window.innerWidth.
+    let pageWidth = refPage.offsetWidth;
+    if (pageWidth < 200) {
+      // .book-container { max-width:900px } inside .reader-main { padding:16px }
+      // Two pages share the container, separated only by the 4px .page-spine.
+      const containerW = Math.min(900, window.innerWidth - 32);
+      pageWidth = isMobile ? containerW : Math.floor((containerW - 4) / 2);
+    }
+    const contentWidth = Math.max(150, pageWidth - padH);
+
+    // Available vertical space: derived from viewport, not from the height:100% flex chain
+    // that breaks on initial load in both Chrome and Safari.
+    const hdr = document.querySelector('.reader-header');
+    const ftr = document.querySelector('.reader-footer');
+    const pageH = Math.max(400,
+      window.innerHeight
+      - (hdr ? hdr.offsetHeight : 48)
+      - (ftr ? ftr.offsetHeight : 32)
+      - 32  // .reader-main padding: 16px top + 16px bottom
+    );
+
+    // Measure the page-header height in isolation — a plain block element, reliable everywhere
+    const hdrSizer = document.createElement('div');
+    hdrSizer.className = 'page-header';
+    hdrSizer.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;';
+    hdrSizer.style.width = contentWidth + 'px';
+    hdrSizer.innerHTML = '<span class="page-chapter">M</span><span class="page-num">0</span>';
+    document.body.appendChild(hdrSizer);
+    void hdrSizer.offsetHeight;
+    const hdrH = hdrSizer.offsetHeight || 28;
+    document.body.removeChild(hdrSizer);
+
+    const maxHeight = Math.max(200, pageH - padV - hdrH);
+
+    // Measurer: a bare .page-content div with height:auto and overflow:visible.
+    // This avoids ALL flex-in-fixed-container height bugs (Chrome & Safari both fail
+    // to compute clientHeight/scrollHeight correctly for flex:1/min-height:0 items
+    // inside position:fixed on initial load).  With height:auto, scrollHeight equals
+    // the natural content height — exactly what we want to compare against maxHeight.
+    const contentEl = document.createElement('div');
+    contentEl.className = 'page-content';
+    contentEl.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;height:auto;overflow:visible;flex:none;min-height:0;';
+    contentEl.style.width  = contentWidth + 'px';
     contentEl.style.fontSize = textSize + 'px';
-    // Force reflow so clientHeight is accurate
-    void contentEl.offsetHeight;
-    const maxHeight = contentEl.clientHeight;
+    document.body.appendChild(contentEl);
 
     paginatedPages = [];
-    let blockIdx = 0;
     let pageNum = 1;
 
-    while (blockIdx < allBlocks.length) {
+    // Use a queue so split paragraph remainders can be prepended
+    const queue = allBlocks.slice();
+
+    while (queue.length > 0) {
       contentEl.innerHTML = '';
       const pageBlocks = [];
 
-      while (blockIdx < allBlocks.length) {
-        const block = allBlocks[blockIdx];
+      while (queue.length > 0) {
+        const block = queue[0];
 
         // Force a page break before a new chapter if there's already content
         if (block.type === 'chapter-start' && pageBlocks.length > 0) break;
@@ -147,14 +206,29 @@
         const el = createBlockEl(block, pageBlocks, false);
         contentEl.appendChild(el);
 
-        // Check overflow; allow at least one block per page
-        if (contentEl.scrollHeight > maxHeight + 1 && pageBlocks.length > 0) {
+        if (contentEl.scrollHeight > maxHeight + 1) {
           contentEl.removeChild(el);
+
+          if (pageBlocks.length === 0) {
+            // Single block won't fit — accept it anyway to avoid infinite loop
+            pageBlocks.push(block);
+            queue.shift();
+          } else {
+            // Try to split the paragraph at a word boundary
+            const split = (block.type === 'paragraph')
+              ? splitParagraphForPage(block, contentEl, maxHeight, textSize)
+              : null;
+            if (split) {
+              pageBlocks.push(split.firstBlock);
+              queue[0] = split.restBlock; // remainder heads the queue for next page
+            }
+            // else: block stays at front of queue, starts the next page
+          }
           break;
         }
 
         pageBlocks.push(block);
-        blockIdx++;
+        queue.shift();
       }
 
       if (pageBlocks.length > 0) {
@@ -169,7 +243,97 @@
       }
     }
 
-    document.body.removeChild(measurer);
+    document.body.removeChild(contentEl);
+  }
+
+  // Split a paragraph block so the first part fits on the current page.
+  // Returns { firstBlock, restBlock } or null if no valid split exists.
+  function splitParagraphForPage(block, contentEl, maxHeight, tSize) {
+    const lineH = tSize * 1.6; // matches CSS line-height: 1.6
+    const minH = lineH * 2;    // require at least 2 lines on each side
+
+    // Remaining vertical space on this page
+    const usedH = contentEl.scrollHeight;
+    if (maxHeight - usedH < minH) return null;
+
+    // Extract plain-text words for binary-search (inline HTML ≈ same word wrapping)
+    const tmp = document.createElement('div');
+    tmp.innerHTML = block.text;
+    const words = (tmp.textContent || '').trim().split(/\s+/).filter(Boolean);
+    if (words.length < 6) return null; // too short to be worth splitting
+
+    // Binary search: largest N where first N words fit in remaining page space
+    let lo = 2, hi = words.length - 2, bestN = -1;
+    while (lo <= hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      const testEl = document.createElement('p');
+      if (block.isFirstInChapter) testEl.className = 'first-para-after-heading';
+      testEl.textContent = words.slice(0, mid).join(' ');
+      contentEl.appendChild(testEl);
+      const fits = contentEl.scrollHeight <= maxHeight + 1;
+      contentEl.removeChild(testEl);
+      if (fits) { bestN = mid; lo = mid + 1; }
+      else hi = mid - 1;
+    }
+
+    if (bestN < 2 || words.length - bestN < 4) return null;
+
+    // Split the actual HTML at word boundary bestN
+    const { firstHtml, restHtml } = splitHtmlAtWords(block.text, bestN);
+    if (!restHtml) return null;
+
+    const firstBlock = Object.assign({}, block, { text: firstHtml });
+    const restBlock  = Object.assign({}, block, {
+      text: restHtml,
+      isFirstInChapter: false,
+      isSplitContinuation: true
+    });
+    return { firstBlock, restBlock };
+  }
+
+  // Split HTML string after the first N words (using DOM Range for correct tag handling).
+  // Returns { firstHtml, restHtml }.
+  function splitHtmlAtWords(html, n) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+
+    let wordCount = 0;
+    let splitNode = null;
+    let splitOffset = 0;
+
+    const walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
+    let node;
+    outer: while ((node = walker.nextNode())) {
+      const parts = node.textContent.split(/(\s+)/);
+      let charPos = 0;
+      for (const part of parts) {
+        if (part.trim() !== '') {
+          wordCount++;
+          if (wordCount === n + 1) {
+            splitNode = node;
+            splitOffset = charPos; // offset of the (n+1)th word in this text node
+            break outer;
+          }
+        }
+        charPos += part.length;
+      }
+    }
+
+    if (!splitNode) return { firstHtml: html, restHtml: '' };
+
+    // Use Range to capture content up to the split point
+    const range = document.createRange();
+    range.setStart(div, 0);
+    range.setEnd(splitNode, splitOffset);
+
+    const firstDiv = document.createElement('div');
+    firstDiv.appendChild(range.cloneContents());
+    range.deleteContents(); // removes captured content from div
+
+    return {
+      firstHtml: firstDiv.innerHTML.trim(),
+      restHtml:  div.innerHTML.trim()
+    };
   }
 
   function createBlockEl(block, _precedingBlocks, withHighlights) {
@@ -186,7 +350,7 @@
     if (block.isFirstInChapter) p.className = 'first-para-after-heading';
     p.setAttribute('data-chapter', block.chapterId);
     p.setAttribute('data-para', String(block.paraIdx));
-    p.id = 'p-' + block.chapterId + '-' + block.paraIdx;
+    if (!block.isSplitContinuation) p.id = 'p-' + block.chapterId + '-' + block.paraIdx;
 
     if (withHighlights) {
       p.innerHTML = applyHighlightsToText(block.text, block.chapterId, block.paraIdx);
@@ -196,7 +360,9 @@
     return p;
   }
 
-  function detectMobile() { isMobile = window.innerWidth <= 768; }
+  function detectMobile() {
+    isMobile = window.innerWidth <= 768 || window.innerHeight > window.innerWidth;
+  }
 
   // ---- Text Size ----
   function loadTextSize() {
@@ -229,32 +395,15 @@
     try {
       const saved = localStorage.getItem(STORAGE_USER);
       if (saved) {
-        currentUser = JSON.parse(saved);
-        // Migrate old format: use email as userId if no userId yet
-        if (!currentUser.userId) {
-          currentUser.userId = currentUser.email || uuid();
-          localStorage.setItem(STORAGE_USER, JSON.stringify(currentUser));
-        }
+        const parsed = JSON.parse(saved);
+        currentUser = { userId: parsed.userId || uuid() };
       }
     } catch (e) { /* ignore */ }
-    updateUserButton();
-    if (!currentUser) showAuthModal();
+    if (!currentUser) {
+      currentUser = { userId: uuid() };
+      localStorage.setItem(STORAGE_USER, JSON.stringify(currentUser));
+    }
   }
-
-  function saveUser(name) {
-    currentUser = { name, userId: uuid() };
-    localStorage.setItem(STORAGE_USER, JSON.stringify(currentUser));
-    updateUserButton();
-  }
-
-  function updateUserButton() {
-    const btn = $('#btn-user');
-    if (currentUser) { btn.textContent = currentUser.name; btn.title = ''; }
-    else { btn.textContent = 'Sign In'; }
-  }
-
-  function showAuthModal() { $('#auth-modal').classList.add('visible'); }
-  function hideAuthModal() { $('#auth-modal').classList.remove('visible'); }
 
   // ---- Highlights ----
   function loadHighlights() {
@@ -388,6 +537,8 @@
 
     updateProgress();
     updateTocHighlight();
+    updatePageStacks();
+    localStorage.setItem(STORAGE_BOOKMARK, String(currentSpread));
   }
 
   function renderPage(el, pageData) {
@@ -455,9 +606,8 @@
 
   function doHighlight() {
     if (!selectionData) return;
-    if (!currentUser) { showAuthModal(); return; }
     const hl = {
-      id: uuid(), userId: currentUser.userId, userName: currentUser.name,
+      id: uuid(), userId: currentUser.userId, userName: '',
       chapterId: selectionData.chapterId, paraIdx: selectionData.paraIdx,
       text: selectionData.text, timestamp: new Date().toISOString()
     };
@@ -469,9 +619,8 @@
 
   function doHighlightAndComment() {
     if (!selectionData) return;
-    if (!currentUser) { showAuthModal(); return; }
     const hl = {
-      id: uuid(), userId: currentUser.userId, userName: currentUser.name,
+      id: uuid(), userId: currentUser.userId, userName: '',
       chapterId: selectionData.chapterId, paraIdx: selectionData.paraIdx,
       text: selectionData.text, timestamp: new Date().toISOString()
     };
@@ -489,7 +638,7 @@
   }
 
   function openCommentModal(level, chapterId, paraIdx, highlightId, contextText) {
-    if (!currentUser) { showAuthModal(); return; }
+    editingCommentId = null;
     $('#comment-level').value = level;
     $('#comment-chapter').value = chapterId || '';
     $('#comment-page').value = '';
@@ -499,8 +648,18 @@
 
     const labels = { paragraph: 'Comment on Passage', page: 'Comment on Section', chapter: 'Comment on Chapter', novel: 'Comment on Novel' };
     $('#comment-modal-title').textContent = labels[level] || 'Add Comment';
+    $('#comment-form').querySelector('button[type="submit"]').textContent = 'Submit Comment';
     const ctx = $('#comment-context');
     ctx.textContent = contextText ? '\u201C' + contextText + '\u201D' : '';
+
+    const removeBtn = $('#btn-remove-highlight');
+    if (highlightId) {
+      removeBtn.style.display = 'block';
+      removeBtn.dataset.hlId = highlightId;
+    } else {
+      removeBtn.style.display = 'none';
+      removeBtn.dataset.hlId = '';
+    }
 
     renderExistingComments(level, chapterId, paraIdx, highlightId);
     $('#comment-modal').classList.add('visible');
@@ -519,23 +678,102 @@
 
     if (filtered.length === 0) { container.innerHTML = ''; return; }
     container.innerHTML = '<h4 style="font-size:13px;margin-bottom:8px;color:var(--text-muted)">Previous Comments</h4>' +
-      filtered.map(c => '<div class="comment-item"><div class="comment-meta"><strong>' + escapeHtml(c.userName) + '</strong> &middot; ' + new Date(c.timestamp).toLocaleDateString() + '</div><div class="comment-body">' + escapeHtml(c.text) + '</div></div>').join('');
+      filtered.map(c => commentItemHtml(c)).join('');
+  }
+
+  function commentItemHtml(c, showHighlightContext) {
+    let ctx = '';
+    if (showHighlightContext && c.highlightId) {
+      const hl = highlights.find(h => h.id === c.highlightId);
+      if (hl) ctx = '<div class="comment-context" style="font-size:12px;margin-bottom:4px;padding:4px 8px;">\u201C' + escapeHtml(hl.text.slice(0, 80)) + (hl.text.length > 80 ? '...' : '') + '\u201D</div>';
+    }
+    const actions = '<span class="comment-actions">' +
+      '<button class="cmt-btn cmt-edit" data-id="' + c.id + '">Edit</button>' +
+      '<button class="cmt-btn cmt-delete" data-id="' + c.id + '">Delete</button>' +
+      '</span>';
+    return '<div class="comment-item">' + ctx +
+      '<div class="comment-meta">' + new Date(c.timestamp).toLocaleDateString() + actions + '</div>' +
+      '<div class="comment-body">' + escapeHtml(c.text) + '</div>' +
+      '</div>';
+  }
+
+  function deleteHighlight(id) {
+    highlights = highlights.filter(h => h.id !== id);
+    saveHighlights();
+    comments = comments.filter(c => c.highlightId !== id);
+    saveComments();
+    $('#comment-modal').classList.remove('visible');
+    renderSpread();
+    renderSidebarComments();
+  }
+
+  function deleteComment(id) {
+    const cmt = comments.find(c => c.id === id);
+    comments = comments.filter(c => c.id !== id);
+    saveComments();
+    renderSidebarComments();
+    if ($('#comment-modal').classList.contains('visible') && cmt) {
+      renderExistingComments(cmt.level, cmt.chapterId, cmt.paraIdx, cmt.highlightId);
+    }
+  }
+
+  function startEditComment(id) {
+    const cmt = comments.find(c => c.id === id);
+    if (!cmt) return;
+    openCommentModal(cmt.level, cmt.chapterId, cmt.paraIdx, cmt.highlightId, null);
+    editingCommentId = id;
+    $('#comment-text').value = cmt.text;
+    $('#comment-modal-title').textContent = 'Edit Comment';
+    $('#comment-form').querySelector('button[type="submit"]').textContent = 'Update Comment';
   }
 
   function submitComment(e) {
     e.preventDefault();
-    if (!currentUser) { showAuthModal(); return; }
     const text = $('#comment-text').value.trim();
     if (!text) return;
-    addComment({
-      id: uuid(), userId: currentUser.userId, userName: currentUser.name,
-      level: $('#comment-level').value, chapterId: $('#comment-chapter').value || null,
-      paraIdx: $('#comment-para').value !== '' ? parseInt($('#comment-para').value) : null,
-      highlightId: $('#comment-highlight-id').value || null,
-      text: text, timestamp: new Date().toISOString()
-    });
+    if (editingCommentId) {
+      const cmt = comments.find(c => c.id === editingCommentId);
+      if (cmt) { cmt.text = text; cmt.timestamp = new Date().toISOString(); }
+      saveComments();
+      editingCommentId = null;
+    } else {
+      addComment({
+        id: uuid(), userId: currentUser.userId, userName: '',
+        level: $('#comment-level').value, chapterId: $('#comment-chapter').value || null,
+        paraIdx: $('#comment-para').value !== '' ? parseInt($('#comment-para').value) : null,
+        highlightId: $('#comment-highlight-id').value || null,
+        text: text, timestamp: new Date().toISOString()
+      });
+    }
     $('#comment-modal').classList.remove('visible');
     $('#comment-text').value = '';
+    renderSidebarComments();
+  }
+
+  // ---- Book Cover ----
+  function openBookCover() {
+    const cover = document.getElementById('book-cover');
+    if (!cover) return;
+    cover.classList.add('opening');
+    cover.addEventListener('animationend', function () {
+      cover.classList.add('hidden');
+      const bc = document.querySelector('.book-container');
+      if (bc) bc.classList.remove('book-is-closed');
+    }, { once: true });
+  }
+
+  // ---- Page Stacks ----
+  function updatePageStacks() {
+    const total = totalSpreads();
+    if (total <= 1) return;
+    const pct = currentSpread / (total - 1);
+    const min = 4, max = 22;
+    const left  = Math.round(min + pct * (max - min));
+    const right = Math.round(min + (1 - pct) * (max - min));
+    const sl = document.getElementById('stack-left');
+    const sr = document.getElementById('stack-right');
+    if (sl) sl.style.width = left + 'px';
+    if (sr) sr.style.width = right + 'px';
   }
 
   // ---- Progress Bar ----
@@ -625,14 +863,7 @@
       list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;text-align:center;padding:20px;">No comments yet.</p>';
       return;
     }
-    list.innerHTML = filtered.map(c => {
-      let scope = '';
-      if (c.level === 'paragraph' && c.highlightId) {
-        const hl = highlights.find(h => h.id === c.highlightId);
-        if (hl) scope = '<div class="comment-context" style="font-size:12px;margin-bottom:4px;padding:4px 8px;">\u201C' + escapeHtml(hl.text.slice(0, 80)) + (hl.text.length > 80 ? '...' : '') + '\u201D</div>';
-      }
-      return '<div class="comment-item">' + scope + '<div class="comment-meta"><strong>' + escapeHtml(c.userName) + '</strong> &middot; ' + new Date(c.timestamp).toLocaleDateString() + '</div><div class="comment-body">' + escapeHtml(c.text) + '</div></div>';
-    }).join('');
+    list.innerHTML = filtered.map(c => commentItemHtml(c, true)).join('');
   }
 
   // ---- Diff ----
@@ -745,18 +976,6 @@
 
   // ---- Event Binding ----
   function bindEvents() {
-    // Auth
-    $('#auth-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = $('#auth-name').value.trim();
-      if (name) { saveUser(name); hideAuthModal(); }
-    });
-    $('#skip-auth').addEventListener('click', hideAuthModal);
-    $('#btn-user').addEventListener('click', () => {
-      showAuthModal();
-      if (currentUser) { $('#auth-name').value = currentUser.name; }
-    });
-
     // Text size
     $('#btn-size-down').addEventListener('click', () => changeTextSize(-1));
     $('#btn-size-up').addEventListener('click', () => changeTextSize(1));
@@ -814,7 +1033,29 @@
 
     // Comment modal
     $('#comment-form').addEventListener('submit', submitComment);
-    $('#close-comment-modal').addEventListener('click', () => $('#comment-modal').classList.remove('visible'));
+    $('#close-comment-modal').addEventListener('click', () => {
+      editingCommentId = null;
+      $('#comment-modal').classList.remove('visible');
+    });
+
+    $('#btn-remove-highlight').addEventListener('click', () => {
+      const hlId = $('#btn-remove-highlight').dataset.hlId;
+      if (hlId) deleteHighlight(hlId);
+    });
+
+    $('#sidebar-comments-list').addEventListener('click', (e) => {
+      const btn = e.target.closest('.cmt-btn');
+      if (!btn) return;
+      if (btn.classList.contains('cmt-delete')) deleteComment(btn.dataset.id);
+      else if (btn.classList.contains('cmt-edit')) startEditComment(btn.dataset.id);
+    });
+
+    $('#existing-comments').addEventListener('click', (e) => {
+      const btn = e.target.closest('.cmt-btn');
+      if (!btn) return;
+      if (btn.classList.contains('cmt-delete')) deleteComment(btn.dataset.id);
+      else if (btn.classList.contains('cmt-edit')) startEditComment(btn.dataset.id);
+    });
 
     // Diff
     $('#btn-diff').addEventListener('click', openDiffModal);

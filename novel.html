@@ -13,20 +13,6 @@ layout: null
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Sign In Modal -->
-  <div id="auth-modal" class="modal">
-    <div class="modal-content auth-modal-content">
-      <h2>Welcome, Reader</h2>
-      <p>Sign in to highlight passages and leave comments.</p>
-      <form id="auth-form">
-        <label for="auth-name">Name</label>
-        <input type="text" id="auth-name" placeholder="Your name" required>
-        <button type="submit" class="btn btn-primary">Continue</button>
-      </form>
-      <button class="btn btn-link" id="skip-auth">Read as guest</button>
-    </div>
-  </div>
-
   <!-- Comment Modal -->
   <div id="comment-modal" class="modal">
     <div class="modal-content comment-modal-content">
@@ -35,6 +21,7 @@ layout: null
         <button class="modal-close" id="close-comment-modal">&times;</button>
       </div>
       <div id="comment-context" class="comment-context"></div>
+      <button id="btn-remove-highlight" class="comment-remove-hl" style="display:none">Remove Highlight</button>
       <form id="comment-form">
         <input type="hidden" id="comment-level">
         <input type="hidden" id="comment-chapter">
@@ -91,7 +78,6 @@ layout: null
       <button class="toolbar-btn" id="btn-toc" title="Table of Contents">Index</button>
       <button class="toolbar-btn" id="btn-comments" title="View Comments">Comments</button>
       <button class="toolbar-btn" id="btn-diff" title="Version Diff">Diff</button>
-      <button class="toolbar-btn" id="btn-user" title="User"></button>
     </div>
   </header>
 
@@ -99,16 +85,30 @@ layout: null
   <main class="reader-main">
     <button class="nav-arrow nav-arrow-left" id="nav-prev" title="Previous page">&lsaquo;</button>
 
-    <div class="book-container">
-      <div class="page page-left" id="page-left">
-        <div class="page-header"><span class="page-chapter"></span><span class="page-num"></span></div>
-        <div class="page-content"></div>
+    <div id="book-frame">
+      <div id="stack-left" class="page-stack"></div>
+
+      <div class="book-container book-is-closed">
+        <div class="page page-left" id="page-left">
+          <div class="page-header"><span class="page-chapter"></span><span class="page-num"></span></div>
+          <div class="page-content"></div>
+        </div>
+        <div class="page-spine"></div>
+        <div class="page page-right" id="page-right">
+          <div class="page-header"><span class="page-chapter"></span><span class="page-num"></span></div>
+          <div class="page-content"></div>
+        </div>
+
+        <!-- Hardcover front cover — covers right page, flips open to the left -->
+        <div id="book-cover">
+          <div class="cover-decoration cover-decoration-top"></div>
+          <h2 class="cover-title">The Shattered Blade</h2>
+          <div class="cover-decoration cover-decoration-mid"></div>
+          <p class="cover-author">T.V. Sanjeev</p>
+        </div>
       </div>
-      <div class="page-spine"></div>
-      <div class="page page-right" id="page-right">
-        <div class="page-header"><span class="page-chapter"></span><span class="page-num"></span></div>
-        <div class="page-content"></div>
-      </div>
+
+      <div id="stack-right" class="page-stack"></div>
     </div>
 
     <button class="nav-arrow nav-arrow-right" id="nav-next" title="Next page">&rsaquo;</button>
