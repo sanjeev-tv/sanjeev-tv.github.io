@@ -7,7 +7,7 @@
 Benedor knew well the omens that would herald the fall of his empire.
 
 
-The first of the three signs would be a red moon. It would rise and stain the star-heavy night like freshly spilled blood. Then the Lifetree would burn, its golden fruits ignited with the fires of Hell. Finally a black void would open up and his master would summon him home.
+The first of the three signs would be a red moon, staining  the starry night like freshly spilled blood. Then the Lifetree would burn, its golden fruits aflame with the fires of Hell. Finally, a black void would open up, and his Maker would call him home.
 
 
 Long ago had he dreamt these signs and long ago had he overcome his fear of them. He was a God, after all. It was golden ichor that coursed through his veins, not the red blood of mortals.
@@ -22,10 +22,10 @@ It was true that the dream had once unnerved him. But he had bargained with the 
 The winds gusted, rippling the long grass at Benedor’s feet, tugging long gold curls from under his iron crown. His bearskin cloak snapped and flowed. He stood in the Evergarden of Ledin, his back to the great Lifetree at its center.
 
 
-Each of the eleven gardens of Hellendor was like a haven of eternal spring, and Ledin was the greatest of them, just as its Lifetree was the greatest of its ilk. The garden was nestled in the shadow of the floating black tower of Orin. It hung high over the continent of Hellendor, like an emerald studded in the snow-white clouds.
+Each of the eleven gardens of Hellendor was like a haven of eternal spring, and Ledin was the greatest of them, just as its Lifetree was the greatest of its ilk. The garden was nestled in the shadow of the floating black tower of Orin. It hung high over the continent of Hellendor like an emerald studded in the snow-white clouds.
 
 
-From the Evergarden, Benedor looked down on his empire. Directly beneath this seat in the clouds was the great city of Uril. The symbol of his holy empire’s might. Around it sprawled the continent of Hellendor, its myriad cities bound fast by his iron hand and iron throne. His master had demanded a dear price for this vision of peace. But he had paid it. He had paid it, and in doing so he had saved his people. It was the only way.
+From the lofty heights of Ledin, Benedor looked down to his empire. Directly beneath this seat in the clouds was Uril, the city of a thousand towers, symbol of his holy empire’s might. Around it sprawled the continent of Hellendor, the myriad city-states bound fast by tight fist and iron throne. His Maker had demanded a dear price for this vision of peace. Benedor had paid it, and in doing so he had saved his people. It was the only way.
 
 
 How fleeting the lives of mortals were, he reflected bitterly. The sum of their breaths measured but a moment against the eternity of his own life.
@@ -34,10 +34,10 @@ How fleeting the lives of mortals were, he reflected bitterly. The sum of their 
 The Spring Goddess’ voice came softly over his shoulder. “Will you not listen to reason, my son?”
 
 
-Benedor did not look back to her. He knew what she had come to say. He knew he had not the time to heed her advice.
+Benedor did not look back. He knew what she had come to say. He had no time to heed her advice.
 
 
-It was a red moon, after all. The Lord of Death demanded his Offerings.
+It was a red moon, after all, and the Lord of Death demanded his Offerings.
 
 
 “Benedor,” she spoke again, with more urgency. Impatiently, he turned to face her.
@@ -64,43 +64,43 @@ The Spring Goddess floated before him, several handspan above the green grasses 
 “I speak of greater threats than Ifaldur,” replied the Spring Goddess, shaking her head slowly. “I worry you will die, if you fight Verrin.”
 
 
-Benedor looked up to the blood moon, now nearing the peak of its arc. There was still time left to sacrifice the Offerings. But he would have to hurry, or risk the wrath of his old master. He exhaled slowly. “Is that all you have come to say to me?”
+Benedor looked up to the blood moon, now nearing the peak of its arc. There was still time left to sacrifice the Offerings. But he would have to hurry, or risk the wrath of his Maker. He exhaled slowly. “Is that all you have come to say to me?”
 
 
 “If you will not heed caution, so be it.” She hesitated, as if gathering her nerves. “What of Rena? Would you let her die too, for your ego?”
 
 
-“Careful.” Did she think so little of him?
+“What is it you imply?” he asked angrily.
 
 
-“I can keep her safe.”
+“I only mean that I can keep her safe.”
 
 
-“Keep her safe? Enough.” Benedor felt another flash of cold fury and turned his back on the Goddess once again. “Leave,” he commanded as he looked out on his empire. “You will regret any more words.”
+“Keep her safe? Do you think so little of me?” Benedor felt another flash of cold fury. He turned his back on the Goddess once again. “Do not say another word,” he commanded as he looked out on his empire. “I have heard enough. I ask that you leave now.”
 
 
 “Benedor—”
 
 
-“I said leave!” he roared, and a flutter of silver sparrows burst from the leaves of the Lifetree. “Leave,” he repeated, now dangerously quiet. “Once before you stole her from me. Never again. I vowed it.”
+“I said leave!” he roared, and a flutter of silver sparrows burst from the leaves of the Lifetree. “Once before you stole her from me. Never again. I vowed it.”
 
 
 “I wished then only to save her, my son,” she pleaded. “I only wish to save them now.”
 
 
-Them. So she knew of his child.
+Them, she said.
 
 
-“I do not need your help to save them.” Benedor glanced to the black tower of Orin, looming imperiously over the Evergarden. His gaze passed up the tower’s height, from the seat of his great throne to the tiers of spiked ramparts and higher still to the Tower’s crown. Rena would be safe there, he assured himself. It was folly to think otherwise. His lip curled, that the Goddess pitied him so, that even now she plotted for what was rightfully his. “If you take them from me,” he said  to her darkly, “let this be the last I ever see you.”
+“I have no need of your help.” Benedor glanced to the black tower of Orin, looming imperiously over the Evergarden. His gaze passed up the tower’s height, from the seat of his great throne to the tiers of spiked ramparts and higher still to the Tower’s crown. Rena would be safe there, he assured himself. It was folly to think otherwise.“If you take them from me,” he said  to her darkly, “let this be the last I ever see you.”
 
 
 He thought his words would hurt her. He hoped they would.
 
 
-But she offered him only a gentle smile, as if this was all she expected of him. “Do not so needlessly make another oath, especially one you are like to break.” She turned to leave. “I wish to see you again, my son. I wonder which of our wishes the Fates will grant.”
+But she offered him only a gentle smile, as if this was all she expected of him. “Do not so needlessly make another oath you are like to break.” She turned to leave. “I hope that I will see you again, my son,” she said over her shoulder. “I wonder which of our wishes the Fates will grant.”
 
 
-And with that she left, a distant golden blur arcing away from his tower. Benedor felt the familiar loneliness reseal his heart in iron.
+And with that she left, a golden blur flying from from his tower. Benedor felt the familiar loneliness reseal his heart in iron.
 
 
 He turned to the Lifetree that stood in the center of the garden. Tall it was, silver of trunk and green of leaf, its boughs heavy with glittering golden fruit. For a while he stood there, alone and sheltered under the great tree’s dense canopy. He listened—to the song of the sparrows, to the questing wind, to the steady march of his own beating heart.
@@ -355,7 +355,7 @@ Benedor blinked. He turned his gaze fondly to the old Soulmage. They had been br
 Seltin shook his head weakly. “I will not leave you. Not like they did.” He bled from his cheek, a steady stream of ichor as gold as Benedor’s own, and his eyes were bright with tears.
 
 
-Benedor recognized his fear. Who could not fear their master? He saw it so clearly now, his duty. He only wished he could have seen it earlier. “I will not let Him have you,” he vowed. “You will return to this world. For I need you to watch over them. Keep them safe. For me.”
+Benedor recognized his fear. Who could not fear their Maker? He saw it so clearly now, his duty. He only wished he could have seen it earlier. “I will not let Him have you,” he vowed. “You will return to this world. For I need you to watch over them. Keep them safe. For me.”
 
 
 “Yes, my Lord Emperor,” promised Seltin.
