@@ -37,19 +37,22 @@
     loadTextSize();
     bindEvents();
 
-    // Wait for fonts to load, then defer to next frame so the flex
-    // layout is fully committed before we measure page heights.
+    // Wait for all fonts to load, then defer to next animation frame so the flex
+    // layout is fully committed before we measure page heights and paginate.
     document.fonts.ready.then(() => {
       requestAnimationFrame(() => {
         paginateContent();
         populateToc();
+        // Restore from anchor/bookmark if available, else start at 0
+        const anchor = getAnchorBlock();
+        restoreFromAnchor(anchor);
+        renderSpread();
+        // Always open the cover on first load
         const savedSpread = parseInt(localStorage.getItem(STORAGE_BOOKMARK) || '0');
         const targetSpread = (savedSpread > 0 && savedSpread < totalSpreads()) ? savedSpread : 0;
-        // Always render from spread 0 so the cover reveals the first page,
-        // then animate forward to the bookmark after the cover opens.
-        currentSpread = 0;
-        renderSpread();
-        setTimeout(() => openBookCover(targetSpread), 500);
+        setTimeout(() => {
+          openBookCover(targetSpread);
+        }, 500);
       });
     });
 
@@ -154,35 +157,54 @@
     }
     const contentWidth = Math.max(150, pageWidth - padH);
 
-    // Available vertical space: derived from viewport, not from the height:100% flex chain
-    // that breaks on initial load in both Chrome and Safari.
-    const hdr = document.querySelector('.reader-header');
-    const ftr = document.querySelector('.reader-footer');
-    const pageH = Math.max(400,
-      window.innerHeight
-      - (hdr ? hdr.offsetHeight : 48)
-      - (ftr ? ftr.offsetHeight : 32)
-      - 32  // .reader-main padding: 16px top + 16px bottom
-    );
 
-    // Measure the page-header height in isolation — a plain block element, reliable everywhere
-    const hdrSizer = document.createElement('div');
-    hdrSizer.className = 'page-header';
-    hdrSizer.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;';
-    hdrSizer.style.width = contentWidth + 'px';
-    hdrSizer.innerHTML = '<span class="page-chapter">M</span>';
-    document.body.appendChild(hdrSizer);
-    void hdrSizer.offsetHeight;
-    // offsetHeight excludes margin — add margin-bottom so rawMax reflects actual space used
-    const hdrMargin = parseFloat(getComputedStyle(hdrSizer).marginBottom) || 16;
-    const hdrH = (hdrSizer.offsetHeight || 28) + hdrMargin;
-    document.body.removeChild(hdrSizer);
-
-    // Snap to exact line grid so every page holds the same number of rows.
-    const lineH = textSize * 1.6;
-    const rawMax = Math.max(200, pageH - padV - hdrH);
-    const linesPerPage = Math.floor(rawMax / lineH);
-    const maxHeight = Math.max(lineH, linesPerPage * lineH);
+    // --- Robust: Measure available height for .page-content using a hidden, styled dummy element ---
+    let maxHeight;
+    {
+      // Create a hidden .page-content with all relevant styles
+      const dummyPage = document.createElement('div');
+      dummyPage.className = refPage.className;
+      dummyPage.style.cssText = refPage.style.cssText + ';position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;';
+      dummyPage.style.width = pageWidth + 'px';
+      dummyPage.style.height = refPage.style.height || refPage.offsetHeight + 'px';
+      // Add a header, content, and footer as in the real page
+      const dummyHeader = document.createElement('div');
+      dummyHeader.className = 'page-header';
+      dummyHeader.style.height = '';
+      dummyHeader.innerHTML = '<span class="page-chapter">M</span>';
+      const dummyContent = document.createElement('div');
+      dummyContent.className = 'page-content';
+      dummyContent.style.fontSize = textSize + 'px';
+      dummyContent.style.width = contentWidth + 'px';
+      // Fill with a tall block to force max expansion
+      const tall = document.createElement('div');
+      tall.style.height = '10000px';
+      dummyContent.appendChild(tall);
+      const dummyFooter = document.createElement('div');
+      dummyFooter.className = 'page-footer';
+      dummyFooter.innerHTML = '';
+      dummyPage.appendChild(dummyHeader);
+      dummyPage.appendChild(dummyContent);
+      dummyPage.appendChild(dummyFooter);
+      document.body.appendChild(dummyPage);
+      // Now measure the available height for .page-content
+      maxHeight = dummyContent.offsetHeight;
+      document.body.removeChild(dummyPage);
+      // Fallback if something goes wrong
+      if (!maxHeight || maxHeight < 100) {
+        const hdr = document.querySelector('.reader-header');
+        const ftr = document.querySelector('.reader-footer');
+        const pageH = Math.max(400,
+          window.innerHeight
+          - (hdr ? hdr.offsetHeight : 48)
+          - (ftr ? ftr.offsetHeight : 32)
+          - 32
+        );
+        const lineH = textSize * 1.6;
+        const linesPerPage = Math.floor(pageH / lineH);
+        maxHeight = Math.max(lineH, linesPerPage * lineH);
+      }
+    }
 
     // Measurer: a bare .page-content div with height:auto and overflow:visible.
     // This avoids ALL flex-in-fixed-container height bugs (Chrome & Safari both fail
@@ -264,24 +286,28 @@
     const words = (tmp.textContent || '').trim().split(/\s+/).filter(Boolean);
     if (words.length < 2) return null;
 
-    // Binary search: largest N where first N words fit in remaining page space
-    let lo = 1, hi = words.length - 1, bestN = -1;
-    while (lo <= hi) {
-      const mid = Math.floor((lo + hi) / 2);
+    // Greedy word-by-word fill: add words one by one until height exceeds maxHeight
+    let n = 1;
+    let lastGoodN = 0;
+    let lastHeight = null;
+    while (n <= words.length) {
       const testEl = document.createElement('p');
       if (block.isFirstInChapter) testEl.className = 'first-para-after-heading';
-      testEl.textContent = words.slice(0, mid).join(' ');
+      testEl.textContent = words.slice(0, n).join(' ');
       contentEl.appendChild(testEl);
-      const fits = contentEl.scrollHeight <= maxHeight + 1;
+      const h = contentEl.scrollHeight;
       contentEl.removeChild(testEl);
-      if (fits) { bestN = mid; lo = mid + 1; }
-      else hi = mid - 1;
+      if (lastHeight === null) lastHeight = h;
+      if (h > maxHeight + 1) break;
+      lastGoodN = n;
+      lastHeight = h;
+      n++;
     }
 
-    if (bestN < 1 || bestN >= words.length) return null;
+    if (lastGoodN < 1 || lastGoodN >= words.length) return null;
 
-    // Split the actual HTML at word boundary bestN
-    const { firstHtml, restHtml } = splitHtmlAtWords(block.text, bestN);
+    // Split the actual HTML at word boundary lastGoodN
+    const { firstHtml, restHtml } = splitHtmlAtWords(block.text, lastGoodN);
     if (!restHtml) return null;
 
     const firstBlock = Object.assign({}, block, { text: firstHtml });
@@ -773,8 +799,14 @@
     cover.classList.add('opening');
     cover.addEventListener('animationend', function () {
       cover.classList.add('hidden');
+      cover.classList.remove('opening');
       const bc = document.querySelector('.book-container');
       if (bc) bc.classList.remove('book-is-closed');
+      // Remove the cover element from the DOM after hiding
+      setTimeout(() => {
+        if (cover.parentNode) cover.parentNode.removeChild(cover);
+      }, 100);
+      // Always hide the cover after animation, even if targetSpread is 0
       if (targetSpread > 0) {
         setTimeout(() => animateToBookmark(targetSpread), 350);
       }

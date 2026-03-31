@@ -228,7 +228,7 @@ html, body {
 #book-cover.opening {
   animation: cover-open 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-#book-cover.hidden { display: none; }
+#book-cover.hidden { display: none !important; }
 @keyframes cover-open {
   0%   { transform: rotateY(0deg);   opacity: 1; }
   55%  { transform: rotateY(-75deg); opacity: 0.6; }
