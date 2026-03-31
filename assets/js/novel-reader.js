@@ -28,6 +28,22 @@
 
   // ---- Init ----
   function init() {
+            // Helper to re-paginate and re-render after font load/layout
+            function repaginateAfterFontLoad() {
+              paginateContent();
+              populateToc();
+              restoreFromAnchor(getAnchorBlock());
+              renderSpread();
+            }
+
+        // Helper to re-paginate and re-render after font load
+        function repaginateAfterFontLoad() {
+          paginateContent();
+          populateToc();
+          restoreFromAnchor(getAnchorBlock());
+          renderSpread();
+        }
+
     buildBlockList();
     detectMobile();
     loadUser();
@@ -41,12 +57,7 @@
     // layout is fully committed before we measure page heights and paginate.
     document.fonts.ready.then(() => {
       requestAnimationFrame(() => {
-        paginateContent();
-        populateToc();
-        // Restore from anchor/bookmark if available, else start at 0
-        const anchor = getAnchorBlock();
-        restoreFromAnchor(anchor);
-        renderSpread();
+        repaginateAfterFontLoad();
         // Always open the cover on first load
         const savedSpread = parseInt(localStorage.getItem(STORAGE_BOOKMARK) || '0');
         const targetSpread = (savedSpread > 0 && savedSpread < totalSpreads()) ? savedSpread : 0;
@@ -55,6 +66,39 @@
         }, 500);
       });
     });
+
+    // Listen for all font loading events and re-paginate if needed
+    if (document.fonts && typeof document.fonts.addEventListener === 'function') {
+      document.fonts.addEventListener('loadingdone', () => {
+        setTimeout(() => repaginateAfterFontLoad(), 50);
+      });
+      document.fonts.addEventListener('loading', () => {
+        setTimeout(() => repaginateAfterFontLoad(), 50);
+      });
+      document.fonts.addEventListener('loadingerror', () => {
+        setTimeout(() => repaginateAfterFontLoad(), 50);
+      });
+    }
+
+    // Re-paginate on visibility change (e.g., tab switch)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        setTimeout(() => repaginateAfterFontLoad(), 50);
+      }
+    });
+
+    // Fallback: re-paginate after a short timeout on initial load (for edge cases)
+    setTimeout(() => repaginateAfterFontLoad(), 2000);
+
+    // Listen for late font loads and re-paginate if needed
+    if (document.fonts && typeof document.fonts.addEventListener === 'function') {
+      document.fonts.addEventListener('loadingdone', () => {
+        // Wait a frame to ensure layout is committed
+        requestAnimationFrame(() => {
+          repaginateAfterFontLoad();
+        });
+      });
+    }
 
     let resizeTimer;
     window.addEventListener('resize', () => {
