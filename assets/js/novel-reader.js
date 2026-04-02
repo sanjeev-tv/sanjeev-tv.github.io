@@ -905,17 +905,16 @@
     if (isMobile) {
       const bc = document.querySelector('.book-container');
       if (bc) bc.classList.remove('book-is-closed');
-      // Pre-render the bookmarked page behind the cover
-      if (targetSpread > 0) {
-        currentSpread = Math.min(targetSpread, totalSpreads() - 1);
-      }
+      // Start at spread 0 so the slide animation has somewhere to begin
+      currentSpread = 0;
       renderSpread();
-      // Show cover briefly, then fade it out
+      // Show cover briefly, then fade it out; then slide to the bookmark
       setTimeout(() => {
         cover.style.transition = 'opacity 0.3s ease';
         cover.style.opacity = '0';
         cover.addEventListener('transitionend', () => {
           if (cover.parentNode) cover.parentNode.removeChild(cover);
+          if (targetSpread > 0) setTimeout(() => animateToBookmark(targetSpread), 200);
         }, { once: true });
       }, 500);
       return;
@@ -953,42 +952,96 @@
     if (isChromeVisible) hideChrome(); else showChrome();
   }
 
-  // Rapidly flip pages from spread 0 to targetSpread, giving the illusion of
-  // a physical book opening to the reader's last saved position.
+  // ---- Physical Bookmark ----
+  // Inserts the bookmark ribbon onto .book-container for the final landing spread.
+  function insertBookmark() {
+    const existing = document.querySelector('.page-bookmark');
+    if (existing) existing.remove();
+    const bm = document.createElement('div');
+    bm.className = isMobile
+      ? 'page-bookmark page-bookmark-mobile'
+      : 'page-bookmark page-bookmark-desktop';
+    const container = document.querySelector('.book-container');
+    if (container) container.appendChild(bm);
+  }
+
+  // Triggers the slide-out animation and removes the bookmark when done.
+  function releaseBookmark() {
+    const bm = document.querySelector('.page-bookmark');
+    if (!bm) return;
+    bm.classList.add('bookmark-sliding-out');
+    bm.addEventListener('animationend', () => bm.remove(), { once: true });
+  }
+
+  // Animate from the current spread to targetSpread, simulating rapidly turning pages.
+  // Uses exponential decay so steps slow down as they approach the bookmark.
+  // Desktop: 3-D page-flip overlay. Mobile: CSS slide animation.
   function animateToBookmark(targetSpread) {
     if (targetSpread <= 0 || targetSpread >= totalSpreads()) return;
 
     isAnimating = true;
 
-    const MAX_SHOWN = 3;    // max individual visible flips regardless of distance
-    const FIRST_MS  = 120;  // fastest flip (first one)
-    const LAST_MS   = 340;  // slowest flip (last one — deliberate landing)
+    const MAX_SHOWN = isMobile ? 5  : 3;   // max individually animated steps
+    const FIRST_MS  = isMobile ? 80  : 120; // duration of first (fastest) step
+    const LAST_MS   = isMobile ? 320 : 340; // duration of last (slowest) step
 
-    // If the target is far away, silently jump most of the way first
+    // Silently jump most of the way for large distances
     if (targetSpread > MAX_SHOWN) {
       currentSpread = targetSpread - MAX_SHOWN;
       renderSpread();
     }
 
-    const flips = Math.min(targetSpread, MAX_SHOWN);
-    let remaining = flips;
+    const steps = Math.min(targetSpread, MAX_SHOWN);
+    let remaining = steps;
 
-    function doFlip() {
+    // Exponential interpolation: pos 0 → FIRST_MS, pos (steps-1) → LAST_MS
+    function stepDuration(pos) {
+      return steps > 1
+        ? Math.round(FIRST_MS * Math.pow(LAST_MS / FIRST_MS, pos / (steps - 1)))
+        : LAST_MS;
+    }
+
+    function doStep() {
       if (remaining <= 0) { isAnimating = false; return; }
       remaining--;
-      // pos: 0 = first (fastest), flips-1 = last (slowest)
-      const pos = flips - 1 - remaining;
-      const duration = flips > 1
-        ? Math.round(FIRST_MS * Math.pow(LAST_MS / FIRST_MS, pos / (flips - 1)))
-        : LAST_MS;
+      const pos = steps - 1 - remaining; // 0 = first/fastest, steps-1 = last/slowest
+      const duration = stepDuration(pos);
+      const isLastStep = remaining === 0;
 
-      const container = $('.book-container');
-      const overlay = document.createElement('div');
-      overlay.className = 'page-flip-overlay flip-forward';
-      overlay.style.animationDuration = duration + 'ms';
+      if (isMobile) {
+        // Mobile: "deal card" — snapshot old page, render new one underneath, slide old off left
+        const pr = document.getElementById('page-right');
+        const deptHeader  = pr ? pr.querySelector('.page-header').innerHTML : '';
+        const deptContent = pr ? pr.querySelector('.page-content').innerHTML : '';
+        const deptFooter  = pr ? pageFooterHtml(pr) : '';
 
-      if (!isMobile) {
-        // Front face: snapshot of the current right page (departing)
+        currentSpread++;
+        renderSpread();
+        if (isLastStep) insertBookmark();
+
+        const dealOverlay = document.createElement('div');
+        dealOverlay.className = 'mobile-deal-overlay';
+        dealOverlay.style.animation = 'mobile-deal-left ' + duration + 'ms ease-in forwards';
+        dealOverlay.innerHTML =
+          '<div class="page-header">' + deptHeader + '</div>' +
+          '<div class="page-content">' + deptContent + '</div>' +
+          '<div class="page-footer">' + deptFooter + '</div>';
+        const frame = document.getElementById('book-frame');
+        if (frame) frame.appendChild(dealOverlay);
+
+        setTimeout(() => {
+          dealOverlay.remove();
+          if (remaining > 0) doStep();
+          else { isAnimating = false; setTimeout(releaseBookmark, 500); }
+        }, duration + 25);
+      } else {
+        // Desktop: 3-D flip overlay
+        const container = $('.book-container');
+        const overlay = document.createElement('div');
+        overlay.className = 'page-flip-overlay flip-forward';
+        overlay.style.animationDuration = duration + 'ms';
+
+        // Front face: snapshot of the departing right page
         const rp = $('#page-right');
         const front = document.createElement('div');
         front.className = 'flip-face flip-front';
@@ -997,14 +1050,13 @@
           '<div class="page-content">' + rp.querySelector('.page-content').innerHTML + '</div>' +
           '<div class="page-footer">' + pageFooterHtml(rp) + '</div>';
         overlay.appendChild(front);
-      }
 
-      container.appendChild(overlay);
-      currentSpread++;
-      renderSpread();
+        container.appendChild(overlay);
+        currentSpread++;
+        renderSpread();
+        if (isLastStep) insertBookmark();
 
-      if (!isMobile) {
-        // Back face: snapshot of the newly arrived left page
+        // Back face: snapshot of the arriving left page
         const lp = $('#page-left');
         const back = document.createElement('div');
         back.className = 'flip-face flip-back';
@@ -1013,16 +1065,16 @@
           '<div class="page-content">' + lp.querySelector('.page-content').innerHTML + '</div>' +
           '<div class="page-footer">' + pageFooterHtml(lp) + '</div>';
         overlay.appendChild(back);
-      }
 
-      overlay.addEventListener('animationend', function () {
-        overlay.remove();
-        if (remaining > 0) setTimeout(doFlip, 25);
-        else isAnimating = false;
-      }, { once: true });
+        overlay.addEventListener('animationend', function () {
+          overlay.remove();
+          if (remaining > 0) setTimeout(doStep, 25);
+          else { isAnimating = false; setTimeout(releaseBookmark, 500); }
+        }, { once: true });
+      }
     }
 
-    doFlip();
+    doStep();
   }
 
   // ---- Page Stacks ----
@@ -1332,6 +1384,9 @@
     $('#close-diff-modal').addEventListener('click', () => $('#diff-modal').classList.remove('visible'));
     $('#run-diff').addEventListener('click', runDiff);
 
+    // Background picker (desktop only)
+    initBackgroundPicker();
+
     // Close modals on backdrop
     $$('.modal').forEach(modal => {
       modal.addEventListener('click', (e) => { if (e.target === modal && modal.id !== 'auth-modal') modal.classList.remove('visible'); });
@@ -1380,6 +1435,72 @@
         }
       });
     }
+  }
+
+  // ---- Background Picker ----
+  function applyBackground(url) {
+    if (url) {
+      document.body.style.backgroundImage = 'url(' + JSON.stringify(url) + ')';
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+      document.body.style.backgroundAttachment = 'fixed';
+    } else {
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundAttachment = '';
+    }
+  }
+
+  function initBackgroundPicker() {
+    const bgBtn  = document.getElementById('btn-bg');
+    const picker = document.getElementById('bg-picker');
+    const bgs    = window.NOVEL_BACKGROUNDS;
+    if (!bgBtn || !picker || !bgs || !bgs.length) return;
+
+    // Build item list
+    bgs.forEach(bg => {
+      const item = document.createElement('button');
+      item.className = 'bg-picker-item';
+      item.dataset.url = bg.url;
+      item.textContent = bg.name;
+      picker.appendChild(item);
+    });
+
+    // Restore saved selection
+    const saved = localStorage.getItem('novel_background');
+    if (saved) {
+      applyBackground(saved);
+      const match = picker.querySelector('[data-url="' + saved + '"]');
+      if (match) match.classList.add('active');
+    }
+
+    // Toggle picker open/closed
+    bgBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      picker.classList.toggle('open');
+    });
+
+    // Select / deselect a background
+    picker.addEventListener('click', (e) => {
+      const item = e.target.closest('.bg-picker-item');
+      if (!item) return;
+      const url      = item.dataset.url;
+      const wasActive = item.classList.contains('active');
+      picker.querySelectorAll('.bg-picker-item').forEach(i => i.classList.remove('active'));
+      if (wasActive) {
+        applyBackground(null);
+        localStorage.removeItem('novel_background');
+      } else {
+        item.classList.add('active');
+        applyBackground(url);
+        localStorage.setItem('novel_background', url);
+      }
+      picker.classList.remove('open');
+    });
+
+    // Close on outside click
+    document.addEventListener('click', () => picker.classList.remove('open'));
   }
 
   // ---- Go ----

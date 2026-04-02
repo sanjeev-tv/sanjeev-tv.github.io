@@ -8,6 +8,7 @@ layout: null
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Shattered Blade | {{ site.title }}</title>
   <script>window.NOVEL_FORCE_DESKTOP = true;</script>
+  <script>window.NOVEL_BACKGROUNDS = [{% for file in site.static_files %}{% if file.path contains '/assets/backgrounds/' %}{"name":"{{ file.basename }}","url":"{{ file.path | relative_url }}"},{% endif %}{% endfor %}];</script>
   <link rel="stylesheet" href="{{ '/assets/css/novel-reader.css' | relative_url }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,6 +80,10 @@ layout: null
       <button class="toolbar-btn" id="btn-toc" title="Table of Contents">Index</button>
       <button class="toolbar-btn" id="btn-comments" title="View Comments">Comments</button>
       <button class="toolbar-btn" id="btn-diff" title="Version Diff">Diff</button>
+      <div class="bg-picker-wrapper">
+        <button class="toolbar-btn" id="btn-bg" title="Background">Scene</button>
+        <div id="bg-picker" class="bg-picker"></div>
+      </div>
     </div>
   </header>
 

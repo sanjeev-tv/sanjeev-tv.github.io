@@ -114,7 +114,7 @@ html, body {
   justify-content: center;
   height: calc(100vh - 48px - 32px);
   position: relative;
-  padding: 16px;
+  padding: 48px 24px;
 }
 
 /* ===== Navigation Arrows ===== */
@@ -990,7 +990,7 @@ body.mobile-reader.chrome-visible .mobile-bottom-chrome {
     padding: 5px 8px;
   }
 
-  /* Page slide-in animations (applied directly to #page-right by JS) */
+  /* Page slide-in animations (normal navigation) */
   @keyframes mobile-page-in-right {
     from { transform: translateX(100%); }
     to   { transform: translateX(0); }
@@ -998,6 +998,48 @@ body.mobile-reader.chrome-visible .mobile-bottom-chrome {
   @keyframes mobile-page-in-left {
     from { transform: translateX(-100%); }
     to   { transform: translateX(0); }
+  }
+
+  /* "Deal card" animation — old page exits left during bookmark restore */
+  @keyframes mobile-deal-left {
+    0%   { transform: translateX(0);      opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateX(-110%);  opacity: 0; }
+  }
+  .mobile-deal-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: var(--page-bg-alt);
+    padding: 40px 28px;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .mobile-deal-overlay .page-header {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-style: italic;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 16px;
+    letter-spacing: 0.04em;
+  }
+  .mobile-deal-overlay .page-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    font-family: var(--serif);
+    font-size: var(--reader-font-size, 20px);
+    line-height: 1.6;
+  }
+  .mobile-deal-overlay .page-footer {
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-top: 8px;
   }
 }
 
@@ -1019,6 +1061,84 @@ body.mobile-reader.chrome-visible .mobile-bottom-chrome {
 @media (orientation: portrait) and (min-width: 769px) {
   #stack-left, #stack-right { display: none; }
   #book-frame { border-radius: 4px; }
+}
+
+/* ===== Background Picker ===== */
+.bg-picker-wrapper {
+  position: relative;
+}
+.bg-picker {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 6px;
+  padding: 4px;
+  z-index: 300;
+  min-width: 130px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.bg-picker.open { display: block; }
+.bg-picker-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--header-text);
+  padding: 8px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.bg-picker-item:hover { background: var(--btn-hover); }
+.bg-picker-item.active { color: var(--accent-light); }
+.bg-picker-item.active::before { content: '✓  '; }
+
+/* ===== Physical Bookmark ===== */
+.page-bookmark {
+  position: absolute;
+  z-index: 15;
+  pointer-events: none;
+}
+
+/* Desktop: rectangular bookmark, left edge flush with spine, right-hand page only */
+.page-bookmark-desktop {
+  top: -30px;
+  bottom: 20%;
+  left: calc(50% + 2px);
+  width: 144px;
+  background: linear-gradient(180deg, #24508a 0%, #152d55 55%, #0f2040 100%);
+  border-radius: 0 2px 0 0;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.45);
+}
+
+/* Mobile: small ribbon tab in top-right corner */
+.page-bookmark-mobile {
+  top: 0;
+  right: 24px;
+  width: 22px;
+  height: 54px;
+  background: linear-gradient(160deg, #24508a 0%, #152d55 55%, #0f2040 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 82%, 50% 100%, 0% 82%);
+  filter: drop-shadow(-1px 3px 6px rgba(0,0,0,0.5));
+}
+
+/* Slide-out: moves upward and fades */
+@keyframes bookmark-slide-out {
+  0%   { transform: translateY(0);      opacity: 1; }
+  45%  { opacity: 1; }
+  100% { transform: translateY(-200px); opacity: 0; }
+}
+.page-bookmark-desktop.bookmark-sliding-out {
+  animation: bookmark-slide-out 1.2s ease-in forwards;
+}
+.page-bookmark-mobile.bookmark-sliding-out {
+  animation: bookmark-slide-out 0.8s ease-in forwards;
 }
 
 /* ===== 3D Page Flip ===== */
