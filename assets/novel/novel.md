@@ -7,7 +7,7 @@
 Benedor knew well the omens that would herald the fall of his empire.
 
 
-Three signs there would be. First a red moon would stain the starry night like freshly spilled blood. Then the Lifetree would burn, and its golden fruits would ignite with the fires of Hell. Finally, a black void would open up, and his Maker would call him home.
+The first of the three signs would be a red moon, staining  the starry night like freshly spilled blood. Then the Lifetree would ignite as its golden fruits burned with the fires of Hell. Finally, a black void would open up, and his Maker would call him home.
 
 
 Long ago had he dreamt these signs and long ago had he overcome his fear of them. He was a God, after all. It was golden ichor that coursed through his veins, not the red blood of mortals.
@@ -373,7 +373,7 @@ Seltin smiled and squeezed his hand. Then Benedor watched him walk toward the Li
 Light bathed his face then, and he looked up, sharply. For a moment he doubted his eyes.
 
 
-There in the heavens saw the Spring Goddess, shining and gold. In her arms she carried a woman.
+There in the heavens saw the Autumns Goddess, shining and gold. In her arms she carried a woman.
 
 
 Rena looked peaceful in her sleep, the blue gem at her throat glimmering in the Goddess’ golden aura. And though the distance between them was great, he saw the Goddess smile at him.
@@ -385,13 +385,13 @@ So she had disobeyed his final order and made him an oath-breaker. He smiled. Th
 Then the gold blur of her fleeing form arced toward the world below. The loneliness returned. He felt as if she had taken with her all that made him good.
 
 
-He closed his eyes, laying in the ever patient night, and he felt a flicker of futile hope. Perhaps he might be spared of his fate. He had served his master well, after all. Had offered so much of himself and his people. Perhaps the third sign would not come this night.
+He closed his eyes. As he lay in the ever patient night, he felt a flicker of futile hope. Perhaps he might be spared of his fate. He had served his master well, after all. Had offered so much of himself and his people. Perhaps the third sign would not come this night.
 
 
 Yet his faith was not to be rewarded.
 
 
-A black pit yawned open in the Garden with a belch of hot and fetid air, a portal to the very depths of Hell. And from its depths spoke an evil voice that grated like knife on stone.
+A black pit yawned open in the Garden with a belch of hot and fetid air. A portal to the very depths of Hell. And from its depths spoke an evil voice that grated like knife on stone.
 
 
 “So ends your reign, Benedor, son of Yomur, son of Ea. Will you answer the call of the Lord of Death?”
@@ -400,4 +400,177 @@ A black pit yawned open in the Garden with a belch of hot and fetid air, a porta
 “I will answer,” Benedor said quietly.
 
 
-Then he felt his body fade as he went forth to meet his master.
+Then his body faded to dust, and he went forth to meet his master.
+
+# Chapter 1
+
+
+## The Dream
+
+
+Like most unusual nights, this one began rather normally.
+
+
+Kotyr meditated with Bern, watching the sun set over the glittering sea. He studied the Words that he’d speak the next day. He shared a meal with his mother, Tilia. He studied some more. It was a heavy task he faced tomorrow, and he’d be a fool not to take it seriously. Then he slept, and he dreamt.
+
+
+In his dream he stood amid an beautiful, endless lea. A rainbow of flowers blanketed the waving grass and danced in the soft breeze. The sun shone warm overhead and it was serene, silent but for a brush of wind and the lilting notes of birdsong. It was Heaven, he knew.
+
+
+Kotyr reached out to catch a swirl of petals. He saw the hand was not his own. Indeed he felt taller, stronger, in a strangely familiar body, and he wondered from which past life he remembered this vision. Thousands of years had passed since the realm of Heaven was lost, so it must be an old, old life. Yet the dream was clear. Almost real.
+
+
+Then he noticed the dragon.
+
+
+His eye registered a flicker of movement and he turned abruptly. A form began to take shape, there on the distant horizon. Its iron scales flashed as it drew nearer and he caught a glimpse of great leathery wings. It was no small beast, he saw. Not like those flightless wyrms rumored now to haunt the Western Steppes of Hellendor. No, in his dream he saw a beautiful, monstrous creature, one of scale and muscle and fire. He remembered the age-old advice and avoided its eyes, though this was but a dream.
+
+
+The dragon roared as it flew toward him, and in that terrible sound was the cadence of intelligence. There were words there. Words he couldn’t understand, or perhaps didn’t wish to.
+
+
+Kotyr woke in a cold tremor. Twenty quick, shallow breaths passed before he could slow his racing heart. Twenty more, slow and shaky, until he knew where he was. It was night. Cold moonlight filtered through the window. His sparse room in the Konai Temple began to take familiar shape. He had few possessions, like most Soulmages. Near the window was a desk strewn with several scrolls and a thick, dusty tome. A lute leaned against it, and in the corner sat a chest with his robes and a cloak hung on a hook near the door.
+
+
+He jumped when the phoenix cried out from the Evergarden. His nerves had not yet quieted. With a sigh he rose and left, pausing on the way to grab his lute.
+
+
+A storm had crept in overnight and covered the world in thick white blanket. Nestled lower on the Western slopes was the walled city of Konai, lit by the warm fire of a thousand torches. The Emperor’s banner gleamed in the East, visible even from this distance. It waved defiantly in the quiet winds.
+
+
+Fifteen years had passed since Verrin had killed the Emperor. Benedor’s black tower had fell from the heavens to smother the white city beneath a shroud of ash and dust. Thousands had did, never to live another life. Kotyr’s father was but one of them.
+
+
+Kotyr couldn’t help but feel a stab of regret. Maybe the loss would sting less if he knew his father, or if his mother did. But he had not yet been born, and Tilia remembered nothing from before she came to Konai. Trauma, Bern said. She’d lost so much that perhaps she chose not to remember it.
+
+
+He stepped out onto the warm green grass. The Konai Evergarden was perched high in the Skybreaker mountains, like an emerald studded in their snow-white crown. On this night the moon shone bright, smiling wanly from a bed of stars.
+
+
+Kotyr looked to the great Lifetree, its fruits glimmering gold in the starry night. The phoenix circled high above. After a moment’s hesitation he strode toward the two figures seated under its canopy.
+
+
+Tilia, turned at his approach. His mother’s robe was the pale blue of a cloudless sky, as was the jewel set in her silver necklace. It was the only jewelry she wore. Her smile as she noticed his expression. “Are you well, Kotyr?” she asked with concern.
+
+
+Kotyr sat beside her, laying his lute on the gentle grass. “I couldn’t sleep,” he whispered, not wanting to disturb Bern.
+
+
+On Tilia’s other side, Bern was the very picture of peace. He sat still as stone in either a deep meditation or a deep sleep. The Soulmage’s hair and beard were tidied into clean white braids. A sharp contrast to Kotyr’s untidy mop of dark hair. Bern was draped in a plain white robe like Kotyr’s and as always, he held his great wooden Staff in his hand.
+
+
+Kotyr waited in silence, watching the phoenix fly above. Allefira, Bern had named her. She had grown old, now in the twilight of her years. Her wings beat weakly, her brilliant scarlet feathers were tipped with silver, and she sang with a tremor in her voice. Yet to Kotyr she seemed beautiful as ever.
+
+
+His gaze misted and he sighed wearily, letting his eyes close. He thought of how little time the phoenix had left. He thought of the role he would play in her death.
+
+
+He had mastered the spells of reaping and releasing a soul. In Elisari, the language of the Gods, spells were written with a thousand twenty four words. But with practice, a mage could partition their mind into as many pieces, so they could speak the whole spell as a single, layered word. It had taken Kotyr fifteen years of study.
+
+
+Tomorrow, he would reincarnate the phoenix and finally become a Soulmage.
+
+
+Bern’s eyes fluttered open, his face creasing in a familiar smile. “Ah, Kotyr. Could you not find sleep?”
+
+
+“I had a dream. I can’t get it out of my head.”
+
+
+“A dream of what?” asked Tilia.
+
+
+“I dreamed I was in Heaven,” he answered. “I dreamed I was in a sunlit field dappled with flowers, and…in the distance, was this thing.” Kotyr hesitated. “A dragon.”
+
+
+Worry flashed in Bern’s eyes. “I see. A sight that would steal the sleep of even the most seasoned warrior. Creatures of pure terror. Perhaps a story, to clear you mind?”
+
+
+“A lighthearted tale,” suggested Tilia. “The song of King Urthen and the Lady of the Moon.”
+
+
+Bern smiled. “So many times have I told that tale that by now, you must know it as well as I do. But no doubt it would distract you.”
+
+
+The phoenix Allefira’s song drifted down as she soared amongst the stars, a melody heavy with melancholy and hope. Kotyr felt another pang of anxiety. Tomorrow would bring more responsibility than he’d ever known.
+
+
+“I don’t wish to be distracted from the dream.” The dream was not some errant memory of a past life, he knew. He knew it for what it was, with a certainty that surprised him. “I don’t think it came naturally. I think it was sent.”
+
+
+“Sent?” Tilia’s eyes widened.
+
+
+“I’m not sure,” he admitted. “To me it felt like a message.”
+
+
+“A message saying what?”
+
+
+Kotyr remembered the dragon and suppressed a shiver of fear. “That Heaven isn’t safe. At least not yet.”
+
+
+“And who would have cause to send such a message?” prompted Bern. He had a twinkle in his eye and Kotyr felt as if he were being tested.
+
+
+He considered. “Maybe it was a boast. So the Lord of Death, or one of his agents.But I don’t think so. I think it was meant as a reminder. Of our duty.” Kotyr held Bern’s gaze. “I think it was sent by the Goddess.”
+
+
+“Indeed,” said the old mage, clearly pleased. “On this, I will defer to your wisdom. It was your dream, after all, and as such it should be yours to interpret as you wish. If it was sent by the Goddess, then I shall tell you a more fitting tale. Perhaps the story of when I was first given my duty, all those years ago. Will that do?”
+
+
+Kotyr smiled. “I’d like that.”
+
+
+“Very well.” Bern leaned against the Lifetree. “Few indeed remember this tale as I do. Where else to start, but the beginning of all things? Thousands of years ago, the people of this world lived as mere children, blissful in their naivety. Those were times of peace, of prosperity, when death itself held no meaning. For a hundred years the people lived so, and the light that shone from their souls showed no signs of waning.
+
+
+“But the nature of time is to change, and like all eras this too had to end. It was on a night like this one, quiet and filled with stars, that I and my brothers fell to this World.”
+
+
+“From Heaven?” asked Kotyr. “Do you remember it? Was it like I saw in my dream?”
+
+
+“This story is mine to tell, and I will tell it was I wish.” Bern frowned. “I do not remember what Heaven was like,” he added after a pause.
+
+
+“I shouldn’t have interrupted.” Kotyr bowed his head respectfully. “Please continue.”
+
+
+The old mage looked to the Lifetree before continuing. “It was here that I emerged. The Tree burst forth from the very mountain, and as I walked, lush grass sprouted from my steps. My own humble paradise. I looked on the world in awe. Majestic peaks with crowns of white reared about me, frozen lakes and icy rivers glittered like gems on their faces. From the stubborn swathes of green pine I heard the melodies of sweet birdsong. And in the distances I marked flashes of gold, so bright and divine, and I knew I was sharing this wonder with my brothers.
+
+
+“I surmised my duty might be as a shepherd, sent by the Maker and the Mother Goddess to guide this people in their ways. Indeed, that remains part of my role.
+
+
+“Soon a bolt of lightning cracked before me, and when I blinked I beheld the Goddess herself. Of ice was her crown, pure white her cloak, her eyes a shock of blue. She was in her Winter form, a form she has never worn since that night. I fell trembling to my knees, so overwhelmed was I, and there I waited until she set her hand upon my head in blessing. Well do I remember her words.
+
+
+“‘Bern, my son,’ she spoke, ‘I am afraid you have little cause to rejoice at my coming. I have a duty to ask of you.’ You have but to name it, I answered. She considered her words before she spoke, and I began to worry. ‘Fate waits,’ she said at last. ‘He waits for us all, and unceasing is his hunger. You must not let him have their souls. Take them, before we lose them to what waits beyond.’
+
+
+“In horror, I asked if she meant for me to kill them. ‘Never,’ she forbade. ‘I ask you to save them. Save them, and let their souls live again in flesh made anew. For with this curse whose weight we must bear, I also give unto you the gift of creating life. Treasure it. Hold it dear. It is the only weapon we have left in this fight.
+
+
+“I told her it would be as she wished. For what else could I say? At that she smiled. ‘My heart breaks that I must lay this burden on you. I will fight for the day when I can return again to tell you that which you will long to hear most. That Heaven is freed, and with it your duty fulfilled. I will fight, and I ask that you do the same, in this way. Until that day comes, or until you find one to take this weight from your soul, if you find you grow weary.’”
+
+
+For a moment Kotyr sat in a contemplative silence. Tomorrow he would become a Soulmage in name, and with it would come the duties of the Order. Sacred duties, given to Bern by the Goddess herself, now passed on to him. He looked east and saw the horizon graying with crisp dawn. “Thank you,” he said quietly. “You’ve given me clarity.”
+
+
+“I am glad to hear that is so,” said the old mage.
+
+
+“I hope you’re not wearying of your burden already.”
+
+
+Bern smiled. “Not for a while yet,” he said, and Kotyr breathed a sigh of relief.
+
+
+The winds were laden with the scent and sound of the Sea. In their wake they left ripples in Kotyr’s long plain robe and tousled his dark waves of his hair. A leaf shook loose from the Lifetree and it floated, featherlike, to land in his outstretched palm. He felt warmth from its touch before it faded in a shimmer of golden dust.
+
+
+“A song, Kotyr, if you will,” Tilia asked. She settled beside Bern against the great tree’s silver trunk.Kotyr listened to the music of the phoenix above. It reminded him of his dream of Heaven, and he wondered what hidden meaning it held. He wondered whether it was the Goddess who’d sent it. He wondered whether she would return, and what form she might take. Spring, he hoped.
+
+
+Then he closed his eyes, holding his lute, and from those strings he coaxed an aimless, wandering tune.
