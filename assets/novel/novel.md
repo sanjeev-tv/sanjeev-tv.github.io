@@ -31,73 +31,79 @@ From the lofty heights of Ledin, Benedor looked down to his empire. Directly ben
 How fleeting the lives of mortals were, he reflected bitterly. The sum of their breaths measured but a moment against the eternity of his own life.
 
 
-The Spring Goddess’ voice came softly over his shoulder. “Will you not listen to reason, my son?”
+The Goddess’ voice came softly over his shoulder. “Will you not listen to reason, Benedor?”
 
 
-Benedor did not look back. He knew what she had come to say. He had no time to heed her advice.
+He did not look back. He knew what she had come to say. He had no time to heed her advice.
 
 
 It was a red moon, after all, and the Lord of Death demanded his Offerings.
 
 
-“Benedor,” she spoke again, with more urgency. Impatiently, he turned to face her.
+“My son,” she spoke again, with more urgency. Impatiently, he turned to face her.
 
 
-The Spring Goddess floated before him, several handspan above the green grasses of the Evergarden, limned by the light of its Lifetree. Her golden curls drifted in a weightless halo about her face and her dress was spun of glittering gold silk that danced in the gentle winds. Benedor stared deep into her eyes. So like his own they were. But in them he noticed a trace of pity and the familiar anger reignited in the pit of his heart.
+The Goddess floated before him, several handspan above the green grasses of the Evergarden, limned by the light of its Lifetree. She wore her Autumn form. Her golden curls drifted in a weightless halo about her face and her dress was spun of glittering red silk that danced in the gentle winds. Benedor stared deep into her eyes. So like his own they were.
 
 
-“Why are you here?” he asked harshly. “Did Yomur send you?”
+“I am not your son,” he said angrily. “I care not that you Pierced the Veil. I care not that you have her memories. You are not her. Why are you here? Did Yomur send you?”
 
 
-“I came of my own accord, to warn you. One of the men tonight may kill you. Relios’ son. His profile aligns with my visions.” ” She looked up to red moon, her mouth twisting with in distaste. “If you must kill, find another.”
+“I came to warn you,” she bit back. “One of the men tonight may kill you. Relios’ son. His profile aligns with my visions.” She looked up to red moon, her mouth twisting with distaste. “If you must kill, find another.”
 
 
-“I have seen Relios’ son,” he sneered. “He is only a boy, and he is nothing like his father. You must think me a fool, that I would lose to a child.”
+“I have seen Relios’ son. He is only a boy, and he is nothing like his father. You must think me a fool, that I would lose to a child.”
 
 
 “Only a fool would be so sure of victory against a foe he has not yet faced. You do not know him.”
 
 
-“I have faced greater dangers.” The old scar at his wrist pulsed. A gift from the Ironhearted, the only man in a thousand years that had ever made him bleed.
+“I have faced greater dangers.” The old scar at his wrist pulsed, a gift from the Ironhearted. The only man in a thousand years that had ever made him bleed.
 
 
-“I speak of greater threats than Ifaldur,” replied the Spring Goddess, shaking her head slowly. “I worry you will die, if you fight Verrin.”
+“I speak of greater threats than Ifaldur,” replied the Autumn Goddess impatiently. “You will die if you fight Verrin.”
 
 
 Benedor looked up to the blood moon, now nearing the peak of its arc. There was still time left to sacrifice the Offerings. But he would have to hurry, or risk the wrath of his Maker. He exhaled slowly. “Is that all you have come to say to me?”
 
 
-“If you will not heed caution, so be it.” She hesitated, as if gathering her nerves. “What of Rena? Would you let her die too, for your ego?”
+Her gaze frosted. “If you will not heed caution, so be it. What of Rena? Would you let her die too, for your ego?”
 
 
 “What is it you imply?” he asked angrily.
 
 
-“I only mean that I can keep her safe.”
+“I can keep her safe.”
 
 
-“Keep her safe? Do you think so little of me?” Benedor felt another flash of cold fury. He turned his back on the Goddess once again. “Do not say another word,” he commanded as he looked out on his empire. “I have heard enough. I ask that you leave now.”
+“Do you think so little of me?” Benedor felt another flash of cold fury. He turned his back on the Goddess once again and looked out on his empire. “I have heard enough. Leave, now.”
 
 
-“Benedor—”
+“My son—”
 
 
-“I said leave!” he roared, and a flutter of silver sparrows burst from the leaves of the Lifetree. “Once before you stole her from me. Never again. I vowed it.”
+“I said leave!” he roared, and a flutter of silver sparrows burst from the leaves of the Lifetree. “Once before you stole her from me. Never again. I made a vow.”
 
 
-“I wished then only to save her, my son,” she pleaded. “I only wish to save them now.”
+“I wished then only to save her just as I only wish to save them now. Perhaps you would see, were you not blinded by your arrogance.”
 
 
 Them, she said.
 
 
-“I have no need of your help.” Benedor glanced to the black tower of Orin, looming imperiously over the Evergarden. His gaze passed up the tower’s height, from the seat of his great throne to the tiers of spiked ramparts and higher still to the Tower’s crown. Rena would be safe there, he assured himself. It was folly to think otherwise.“If you take them from me,” he said  to her darkly, “let this be the last I ever see you.”
+“I have no need of your help.” Benedor glanced to the black tower of Orin, looming imperiously over the Evergarden. His gaze passed up the tower’s height, from the seat of his great throne to the tiers of spiked ramparts and higher still to the Tower’s crown. Rena would be safe there, he assured himself. It was folly to think otherwise.“If you take them from me,” he vowed to her darkly, “let this be the last I ever see you.”
 
 
 He thought his words would hurt her. He hoped they would.
 
 
-But she offered him only a gentle smile, as if this was all she expected of him. “Do not so needlessly make another oath you are like to break.” She turned to leave. “I hope that I will see you again, my son,” she said over her shoulder. “I wonder which of our wishes the Fates will grant.”
+But her cold expression did not yield, as if this was all she expected of him. “A needless oath. I do not intend to live past this night.”
+
+
+That gave him pause. “Will you take another form?”
+
+
+“That information is not yours to know.” She turned to leave, then looked back over her shoulder. “Before that, I vow that I will save your child from you. I wonder which of our oaths Fates will choose to honor.”
 
 
 And with that she left, a golden blur flying from from his tower. Benedor felt the familiar loneliness reseal his heart in iron.
@@ -139,7 +145,7 @@ The blade sang as Benedor whipped it from its sheath. Perfectly balanced, he tho
 “How much easier this would be,” Seltin mused quietly beside him, “if they would only kill themselves.”
 
 
-Benedor scowled. He should be grateful for his company, for Seltin was the last of his Order who remained loyal. Yet he hated the Soulmage in that moment, that his thoughts were so impure. “It would take a heartless man indeed to find killing easy.”
+Benedor scowled. Seltin was the last of his Order who remained loyal, so perhaps he should feel grateful for his company. Yet he hated the Soulmage in that moment, hated that his thoughts were so impure. “It would take a heartless man indeed to find killing easy.”
 
 
 “Alas that such is our duty.” Seltin beckoned forth the Offerings. He arrayed them in a neat line before their Emperor.
@@ -376,10 +382,10 @@ Light bathed his face then, and he looked up, sharply. For a moment he doubted h
 There in the heavens saw the Autumns Goddess, shining and gold. In her arms she carried a woman.
 
 
-Rena looked peaceful in her sleep, the blue gem at her throat glimmering in the Goddess’ golden aura. And though the distance between them was great, he saw the Goddess smile at him.
+Rena looked peaceful in her sleep, the blue gem at her throat glimmering in the Autumn Goddess’ golden aura. And though the distance between them was great, he saw the Goddess smile at him.
 
 
-So she had disobeyed his final order and made him an oath-breaker. He smiled. That was well.
+So she had disobeyed his final order. He smiled. That was well.
 
 
 Then the gold blur of her fleeing form arced toward the world below. The loneliness returned. He felt as if she had taken with her all that made him good.
@@ -414,7 +420,7 @@ Like most unusual nights, this one began rather normally.
 Kotyr meditated with Bern, watching the sun set over the glittering sea. He studied the Words that he’d speak the next day. He shared a meal with his mother, Tilia. He studied some more. It was a heavy task he faced tomorrow, and he’d be a fool not to take it seriously. Then he slept, and he dreamt.
 
 
-In his dream he stood amid an beautiful, endless lea. A rainbow of flowers blanketed the waving grass and danced in the soft breeze. The sun shone warm overhead and it was serene, silent but for a brush of wind and the lilting notes of birdsong. It was Heaven, he knew.
+In his dream he stood amid a beautiful, endless lea. A rainbow of flowers blanketed the waving grass and danced in the soft breeze. The sun shone warm overhead and it was serene, silent but for a brush of wind and the lilting notes of birdsong. It was Heaven, he knew.
 
 
 Kotyr reached out to catch a swirl of petals. He saw the hand was not his own. Indeed he felt taller, stronger, in a strangely familiar body, and he wondered from which past life he remembered this vision. Thousands of years had passed since the realm of Heaven was lost, so it must be an old, old life. Yet the dream was clear. Almost real.
@@ -513,7 +519,7 @@ Kotyr remembered the dragon and suppressed a shiver of fear. “That Heaven isn�
 “And who would have cause to send such a message?” prompted Bern. He had a twinkle in his eye and Kotyr felt as if he were being tested.
 
 
-He considered. “Maybe it was a boast. So the Lord of Death, or one of his agents.But I don’t think so. I think it was meant as a reminder. Of our duty.” Kotyr held Bern’s gaze. “I think it was sent by the Goddess.”
+He considered. “Maybe it was a boast. So the Lord of Death, or one of his agents. But I don’t think so. I think it was meant as a reminder. Of our duty.” Kotyr held Bern’s gaze. “I think it was sent by the Goddess.”
 
 
 “Indeed,” said the old mage, clearly pleased. “On this, I will defer to your wisdom. It was your dream, after all, and as such it should be yours to interpret as you wish. If it was sent by the Goddess, then I shall tell you a more fitting tale. Perhaps the story of when I was first given my duty, all those years ago. Will that do?”

@@ -24,6 +24,13 @@
   let isChromeVisible = false;
   let chromeHideTimer = null;
 
+  // ---- Diff state ----
+  let activeDiffSha     = null;
+  let diffParaMap       = {};  // 'chapterId:paraIdx' → 'add' | 'modified' | 'same'
+  let diffWordMap       = {};  // 'chapterId:paraIdx' → word-diff HTML
+  let diffDelBefore     = {};  // 'chapterId:paraIdx' → [old para texts] injected before this para
+  let diffDelAfterLast  = {};  // 'chapterId' → [old para texts] injected after chapter's last para
+
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
   const uuid = () => crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -436,6 +443,18 @@
     p.setAttribute('data-para', String(block.paraIdx));
     if (!block.isSplitContinuation) p.id = 'p-' + block.chapterId + '-' + block.paraIdx;
 
+    if (activeDiffSha) {
+      const key = block.chapterId + ':' + block.paraIdx;
+      const dtype = diffParaMap[key];
+      if (dtype === 'add') {
+        p.classList.add('para-diff-add');
+      } else if (dtype === 'modified') {
+        p.classList.add('para-diff-modified');
+        p.innerHTML = diffWordMap[key] || block.text;
+        return p;
+      }
+    }
+
     if (withHighlights) {
       p.innerHTML = applyHighlightsToText(block.text, block.chapterId, block.paraIdx);
     } else {
@@ -474,7 +493,7 @@
       const saved = localStorage.getItem(STORAGE_SIZE);
       if (saved) textSize = parseInt(saved);
     } catch (e) { /* ignore */ }
-    textSize = Math.max(12, Math.min(22, textSize || (window.NOVEL_FORCE_MOBILE ? 20 : 16)));
+    textSize = Math.max(12, Math.min(28, textSize || (window.NOVEL_FORCE_MOBILE ? 20 : 16)));
     applyTextSize();
   }
 
@@ -483,7 +502,7 @@
   }
 
   function changeTextSize(delta) {
-    textSize = Math.max(12, Math.min(22, textSize + delta));
+    textSize = Math.max(12, Math.min(28, textSize + delta));
     localStorage.setItem(STORAGE_SIZE, String(textSize));
     applyTextSize();
 
@@ -691,7 +710,33 @@
     const content = el.querySelector('.page-content');
     content.innerHTML = '';
     for (let i = 0; i < pageData.blocks.length; i++) {
-      content.appendChild(createBlockEl(pageData.blocks[i], pageData.blocks.slice(0, i), true));
+      const block = pageData.blocks[i];
+
+      if (activeDiffSha && block.type === 'paragraph') {
+        const key = block.chapterId + ':' + block.paraIdx;
+        for (const delText of (diffDelBefore[key] || [])) {
+          const ghost = document.createElement('p');
+          ghost.className = 'para-diff-del';
+          ghost.innerHTML = delText;
+          content.appendChild(ghost);
+        }
+      }
+
+      content.appendChild(createBlockEl(block, pageData.blocks.slice(0, i), true));
+
+      // After last para of a chapter, inject any trailing deletions
+      if (activeDiffSha && block.type === 'paragraph') {
+        const nextBlock = pageData.blocks[i + 1];
+        const chapterEndsOnPage = !nextBlock || nextBlock.chapterId !== block.chapterId;
+        if (chapterEndsOnPage) {
+          for (const delText of (diffDelAfterLast[block.chapterId] || [])) {
+            const ghost = document.createElement('p');
+            ghost.className = 'para-diff-del';
+            ghost.innerHTML = delText;
+            content.appendChild(ghost);
+          }
+        }
+      }
     }
   }
 
@@ -1182,78 +1227,138 @@
   }
 
   // ---- Diff ----
-  function openDiffModal() {
-    const modal = $('#diff-modal');
-    const sel = $('#diff-version-select');
-    sel.innerHTML = '';
-    // versions[0] is the most recent commit (current); show all older ones
-    const prevVersions = (NOVEL_DATA.versions || []).slice(1);
-    if (prevVersions.length === 0) {
-      sel.innerHTML = '<option value="">No previous versions</option>';
-    } else {
-      for (const v of prevVersions) {
-        const opt = document.createElement('option');
-        opt.value = v.sha;
-        opt.textContent = v.label + ' \u2014 ' + v.date;
-        sel.appendChild(opt);
-      }
-    }
-    $('#diff-output').innerHTML = '<div class="diff-empty">Select a version and click \u201CShow Diff\u201D to compare.</div>';
-    modal.classList.add('visible');
+  function toggleDiffPicker() {
+    const picker = $('#diff-picker');
+    const isOpening = !picker.classList.contains('open');
+    if (isOpening) populateDiffPicker();
+    picker.classList.toggle('open', isOpening);
   }
 
-  function runDiff() {
-    const sha = $('#diff-version-select').value;
-    const scope = $('#diff-scope-select').value;
-    const output = $('#diff-output');
-
-    if (!sha) {
-      output.innerHTML = '<div class="diff-empty">No previous versions to compare against.</div>';
+  function populateDiffPicker() {
+    const picker = $('#diff-picker');
+    picker.innerHTML = '';
+    const versions = (NOVEL_DATA.versions || []).slice(1);
+    if (versions.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'diff-picker-item diff-picker-empty';
+      empty.textContent = 'No saved versions';
+      picker.appendChild(empty);
       return;
     }
+    for (const v of versions) {
+      const btn = document.createElement('button');
+      btn.className = 'diff-picker-item' + (activeDiffSha === v.sha ? ' active' : '');
+      btn.dataset.sha = v.sha;
+      btn.textContent = v.label + ' \u2014 ' + v.date;
+      btn.addEventListener('click', function () {
+        activateDiff(v.sha);
+        picker.classList.remove('open');
+      });
+      picker.appendChild(btn);
+    }
+  }
 
-    output.innerHTML = '<div class="diff-empty">Loading\u2026</div>';
-
+  function activateDiff(sha) {
+    if (activeDiffSha === sha) {
+      deactivateDiff();
+      return;
+    }
     const rawUrl = 'https://raw.githubusercontent.com/' + NOVEL_DATA.repo + '/' + sha + '/assets/novel/novel.md';
-
     fetch(rawUrl)
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
       .then(function (text) {
-        const oldChapters = window.parseNovelMarkdown(text);
-        const chId = getCurrentChapterId();
-        const newParas = getChapterParas(NOVEL_DATA.chapters, chId);
-        const oldParas = getChapterParas(oldChapters, chId);
-
-        const a = scope === 'page' ? getVisibleParas(oldParas, chId) : oldParas;
-        const b = scope === 'page' ? getVisibleParas(newParas, chId) : newParas;
-
-        if (a.length === 0 && b.length === 0) {
-          output.innerHTML = '<div class="diff-empty">Chapter not found in selected version.</div>';
-          return;
-        }
-        output.innerHTML = renderDiff(computeDiff(a, b));
+        activeDiffSha = sha;
+        buildDiffMaps(window.parseNovelMarkdown(text), NOVEL_DATA.chapters);
+        $('#btn-diff').classList.add('diff-active');
+        renderSpread();
       })
-      .catch(function (err) {
-        output.innerHTML = '<div class="diff-empty">Error loading version: ' + escapeHtml(err.message) + '</div>';
-      });
+      .catch(function (err) { console.error('Diff load error:', err.message); });
   }
 
-  function getChapterParas(chapters, chapterId) {
-    const ch = chapters.find(function (c) { return c.id === chapterId; });
-    return ch ? ch.paragraphs : [];
+  function deactivateDiff() {
+    activeDiffSha = null;
+    diffParaMap = {};
+    diffWordMap = {};
+    diffDelBefore = {};
+    diffDelAfterLast = {};
+    $('#btn-diff').classList.remove('diff-active');
+    renderSpread();
   }
 
-  function getVisibleParas(allParas, chapterId) {
-    const pp = pagesPerSpread();
-    const start = currentSpread * pp;
-    const visiblePages = paginatedPages.slice(start, start + pp);
-    const visible = new Set();
-    for (const pg of visiblePages) {
-      for (const b of pg.blocks) {
-        if (b.type === 'paragraph' && b.chapterId === chapterId) visible.add(b.paraIdx);
+  function buildDiffMaps(oldChapters, newChapters) {
+    diffParaMap = {};
+    diffWordMap = {};
+    diffDelBefore = {};
+    diffDelAfterLast = {};
+
+    for (const newCh of newChapters) {
+      const oldCh = oldChapters.find(function (c) { return c.id === newCh.id; });
+      const oldParas = oldCh ? oldCh.paragraphs : [];
+      const newParas = newCh.paragraphs;
+
+      if (oldParas.length === 0) {
+        for (let j = 0; j < newParas.length; j++) diffParaMap[newCh.id + ':' + j] = 'add';
+        continue;
       }
+
+      const ops = computeDiff(oldParas, newParas);
+      let newIdx = 0;
+      let pendingDels = [];
+      let i = 0;
+
+      while (i < ops.length) {
+        if (ops[i].type === 'same') {
+          const key = newCh.id + ':' + newIdx;
+          if (pendingDels.length > 0) { diffDelBefore[key] = pendingDels; pendingDels = []; }
+          diffParaMap[key] = 'same';
+          newIdx++; i++;
+        } else {
+          // Collect a contiguous run of del/add ops
+          const dels = [], adds = [];
+          while (i < ops.length && ops[i].type !== 'same') {
+            if (ops[i].type === 'del') dels.push(ops[i].text);
+            else adds.push(ops[i].text);
+            i++;
+          }
+          const pairCount = Math.min(dels.length, adds.length);
+          // Excess dels (no paired add) accumulate as pending
+          for (let d = pairCount; d < dels.length; d++) pendingDels.push(dels[d]);
+          // Paired del+add → modified with word-level diff
+          for (let p = 0; p < pairCount; p++) {
+            const key = newCh.id + ':' + newIdx;
+            if (pendingDels.length > 0) { diffDelBefore[key] = pendingDels; pendingDels = []; }
+            diffParaMap[key] = 'modified';
+            diffWordMap[key] = buildWordDiff(dels[p], adds[p]);
+            newIdx++;
+          }
+          // Pure adds (no paired del)
+          for (let a = pairCount; a < adds.length; a++) {
+            const key = newCh.id + ':' + newIdx;
+            if (pendingDels.length > 0) { diffDelBefore[key] = pendingDels; pendingDels = []; }
+            diffParaMap[key] = 'add';
+            newIdx++;
+          }
+        }
+      }
+      if (pendingDels.length > 0) diffDelAfterLast[newCh.id] = pendingDels;
     }
-    return allParas.filter(function (_, i) { return visible.has(i); });
+  }
+
+  function buildWordDiff(oldText, newText) {
+    function toPlain(html) {
+      const d = document.createElement('div');
+      d.innerHTML = html;
+      return d.textContent;
+    }
+    const oldTokens = toPlain(oldText).split(/(\s+)/);
+    const newTokens = toPlain(newText).split(/(\s+)/);
+    const ops = computeDiff(oldTokens, newTokens);
+    return ops.map(function (op) {
+      const t = escapeHtml(op.text);
+      if (op.type === 'add') return '<mark class="diff-word-add">' + t + '</mark>';
+      if (op.type === 'del') return '<del class="diff-word-del">' + t + '</del>';
+      return t;
+    }).join('');
   }
 
   function computeDiff(oldLines, newLines) {
@@ -1271,16 +1376,6 @@
     }
     return ops;
   }
-
-  function renderDiff(ops) {
-    return ops.map(op => {
-      if (op.type === 'add') return '<span class="diff-add">+ ' + escapeHtml(op.text) + '</span>';
-      if (op.type === 'del') return '<span class="diff-del">- ' + escapeHtml(op.text) + '</span>';
-      return '<span class="diff-same">  ' + escapeHtml(op.text) + '</span>';
-    }).join('');
-  }
-
-  window.novelDiff = { computeDiff, renderDiff };
 
   // ---- Utility ----
   function escapeHtml(str) {
@@ -1379,10 +1474,11 @@
       else if (btn.classList.contains('cmt-edit')) startEditComment(btn.dataset.id);
     });
 
-    // Diff
-    $('#btn-diff').addEventListener('click', openDiffModal);
-    $('#close-diff-modal').addEventListener('click', () => $('#diff-modal').classList.remove('visible'));
-    $('#run-diff').addEventListener('click', runDiff);
+    // Diff picker
+    $('#btn-diff').addEventListener('click', function (e) { e.stopPropagation(); toggleDiffPicker(); });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.diff-picker-wrapper')) $('#diff-picker').classList.remove('open');
+    });
 
     // Background picker (desktop only)
     initBackgroundPicker();

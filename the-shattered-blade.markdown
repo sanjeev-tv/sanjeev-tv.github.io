@@ -279,29 +279,34 @@ document.getElementById('subscribe-form').addEventListener('submit', function (e
   msgEl.textContent = '';
   msgEl.className = 'subscribe-message';
 
-  fetch('https://buttondown.email/api/emails/embed-subscribe/' + BUTTONDOWN_USERNAME, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email })
-  })
-  .then(function (res) {
+  // Use a hidden iframe form submit to avoid CORS restrictions on the embed endpoint
+  var iframeName = 'bd_iframe_' + Date.now();
+  var iframe = document.createElement('iframe');
+  iframe.name = iframeName;
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  var form = document.createElement('form');
+  form.action = 'https://buttondown.email/api/emails/embed-subscribe/' + BUTTONDOWN_USERNAME;
+  form.method = 'POST';
+  form.target = iframeName;
+  form.style.display = 'none';
+
+  var input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'email';
+  input.value = email;
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
+
+  setTimeout(function () {
     submitBtn.disabled = false;
-    if (res.status === 201) {
-      msgEl.textContent = "You're in! See you Sunday night.";
-      msgEl.className = 'subscribe-message success';
-      document.getElementById('subscriber-email').value = '';
-    } else {
-      return res.json().then(function (data) {
-        var msg = (data.email && data.email[0]) || 'Something went wrong — please try again.';
-        msgEl.textContent = msg;
-        msgEl.className = 'subscribe-message error';
-      });
-    }
-  })
-  .catch(function () {
-    submitBtn.disabled = false;
-    msgEl.textContent = 'Network error — please try again.';
-    msgEl.className = 'subscribe-message error';
-  });
+    msgEl.textContent = "You're in! See you Sunday night.";
+    msgEl.className = 'subscribe-message success';
+    document.getElementById('subscriber-email').value = '';
+    document.body.removeChild(form);
+    document.body.removeChild(iframe);
+  }, 1500);
 });
 </script>

@@ -104,8 +104,8 @@ html, body {
   text-align: center;
   padding: 6px 4px !important;
 }
-.text-size-sm { font-size: 14px !important; }
-.text-size-lg { font-size: 14px !important; }
+.text-size-sm { font-size: 11px !important; }
+.text-size-lg { font-size: 19px !important; }
 
 /* ===== Reader Main ===== */
 .reader-main {
@@ -692,70 +692,72 @@ html, body {
 }
 .comment-remove-hl:hover { color: #c44; }
 
-/* Diff Modal */
-.diff-modal-content {
-  max-width: 700px;
-  width: 95%;
+/* ===== Diff Picker Dropdown ===== */
+.diff-picker-wrapper {
+  position: relative;
 }
-.diff-controls {
-  display: flex;
-  gap: 12px;
-  align-items: end;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.diff-controls label {
-  font-size: 16px;
-  color: var(--text-muted);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.diff-controls select {
-  background: var(--btn-bg);
-  color: var(--header-text);
+.diff-picker {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--modal-bg);
   border: 1px solid var(--modal-border);
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-family: var(--sans);
-  font-size: 16px;
+  border-radius: 6px;
+  padding: 4px;
+  z-index: 300;
+  min-width: 210px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
+.diff-picker.open { display: block; }
+.diff-picker-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--header-text);
+  padding: 8px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.diff-picker-item:hover { background: var(--btn-hover); }
+.diff-picker-item.active { color: var(--accent-light); }
+.diff-picker-item.active::before { content: '✓  '; }
+.diff-picker-empty { color: var(--text-muted); font-style: italic; cursor: default; }
+.diff-picker-empty:hover { background: none; }
 
-.diff-output {
-  background: #1a1a1e;
-  border-radius: 4px;
-  padding: 16px;
-  font-family: 'Courier New', monospace;
-  font-size: 16px;
-  line-height: 1.6;
-  max-height: 400px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.diff-output .diff-add {
+/* Active state on the Diff toolbar button */
+.toolbar-btn.diff-active { color: var(--accent-light); background: var(--btn-hover); }
+
+/* ===== Inline Diff Highlighting ===== */
+.para-diff-add {
   background: var(--diff-add);
-  display: block;
-  padding: 2px 4px;
-  border-radius: 2px;
+  border-left: 3px solid rgba(80, 200, 120, 0.6);
+  padding-left: 6px;
+  margin-left: -9px;
 }
-.diff-output .diff-del {
+.para-diff-del {
   background: var(--diff-del);
-  display: block;
-  padding: 2px 4px;
-  border-radius: 2px;
+  border-left: 3px solid rgba(220, 60, 60, 0.5);
+  padding-left: 6px;
+  margin-left: -9px;
   text-decoration: line-through;
+  opacity: 0.8;
 }
-.diff-output .diff-same {
-  display: block;
-  padding: 2px 4px;
-  color: var(--text-muted);
+.diff-word-add {
+  background: var(--diff-add);
+  border-radius: 2px;
+  padding: 0 1px;
 }
-.diff-output .diff-empty {
-  text-align: center;
-  color: var(--text-muted);
-  font-style: italic;
-  font-family: var(--sans);
+.diff-word-del {
+  background: var(--diff-del);
+  border-radius: 2px;
+  padding: 0 1px;
+  text-decoration: line-through;
 }
 
 /* ===== Comments Sidebar ===== */
@@ -817,7 +819,6 @@ html, body {
 
 /* ===== Scrollbar ===== */
 .page::-webkit-scrollbar,
-.diff-output::-webkit-scrollbar,
 .sidebar-comments-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -825,7 +826,6 @@ html, body {
   background: rgba(0,0,0,0.15);
   border-radius: 3px;
 }
-.diff-output::-webkit-scrollbar-thumb,
 .sidebar-comments-list::-webkit-scrollbar-thumb {
   background: rgba(255,255,255,0.1);
   border-radius: 3px;

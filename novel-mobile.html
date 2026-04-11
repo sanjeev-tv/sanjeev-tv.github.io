@@ -37,27 +37,6 @@ layout: null
   </div>
 
   <!-- Diff Modal -->
-  <div id="diff-modal" class="modal">
-    <div class="modal-content diff-modal-content">
-      <div class="modal-header">
-        <h3>Version Diff</h3>
-        <button class="modal-close" id="close-diff-modal">&times;</button>
-      </div>
-      <div class="diff-controls">
-        <label>Compare current with:
-          <select id="diff-version-select"></select>
-        </label>
-        <label>Scope:
-          <select id="diff-scope-select">
-            <option value="page">Current Page</option>
-            <option value="chapter">Current Chapter</option>
-          </select>
-        </label>
-        <button class="btn btn-secondary" id="run-diff">Show Diff</button>
-      </div>
-      <div id="diff-output" class="diff-output"></div>
-    </div>
-  </div>
 
   <!-- Highlight Toolbar (appears on text selection) -->
   <div id="highlight-toolbar" class="highlight-toolbar">
@@ -78,7 +57,10 @@ layout: null
       </div>
       <button class="toolbar-btn" id="btn-toc" title="Table of Contents">Index</button>
       <button class="toolbar-btn" id="btn-comments" title="View Comments">Comments</button>
-      <button class="toolbar-btn" id="btn-diff" title="Version Diff">Diff</button>
+      <div class="diff-picker-wrapper">
+        <button class="toolbar-btn" id="btn-diff" title="Version Diff">Diff</button>
+        <div id="diff-picker" class="diff-picker"></div>
+      </div>
     </div>
   </header>
 
