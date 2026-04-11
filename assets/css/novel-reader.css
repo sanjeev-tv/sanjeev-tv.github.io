@@ -93,16 +93,21 @@ html, body {
 /* Text Size Controls */
 .text-size-controls {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 2px;
   margin-right: 4px;
 }
 .text-size-btn {
   font-family: var(--serif) !important;
   font-weight: 600;
-  min-width: 28px;
-  text-align: center;
-  padding: 6px 4px !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
 }
 .text-size-sm { font-size: 11px !important; }
 .text-size-lg { font-size: 19px !important; }

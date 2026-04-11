@@ -1237,7 +1237,7 @@
   function populateDiffPicker() {
     const picker = $('#diff-picker');
     picker.innerHTML = '';
-    const versions = (NOVEL_DATA.versions || []).slice(1);
+    const versions = (NOVEL_DATA.versions || []).slice(0, -1);
     if (versions.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'diff-picker-item diff-picker-empty';
@@ -1249,7 +1249,7 @@
       const btn = document.createElement('button');
       btn.className = 'diff-picker-item' + (activeDiffSha === v.sha ? ' active' : '');
       btn.dataset.sha = v.sha;
-      btn.textContent = v.label + ' \u2014 ' + v.date;
+      btn.textContent = v.label;
       btn.addEventListener('click', function () {
         activateDiff(v.sha);
         picker.classList.remove('open');

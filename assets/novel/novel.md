@@ -379,7 +379,7 @@ Seltin smiled and squeezed his hand. Then Benedor watched him walk toward the Li
 Light bathed his face then, and he looked up, sharply. For a moment he doubted his eyes.
 
 
-There in the heavens saw the Autumns Goddess, shining and gold. In her arms she carried a woman.
+There in the heavens saw the Autumn Goddess, shining and gold. In her arms she carried a woman.
 
 
 Rena looked peaceful in her sleep, the blue gem at her throat glimmering in the Autumn Goddess’ golden aura. And though the distance between them was great, he saw the Goddess smile at him.
@@ -576,7 +576,10 @@ Bern smiled. “Not for a while yet,” he said, and Kotyr breathed a sigh of re
 The winds were laden with the scent and sound of the Sea. In their wake they left ripples in Kotyr’s long plain robe and tousled his dark waves of his hair. A leaf shook loose from the Lifetree and it floated, featherlike, to land in his outstretched palm. He felt warmth from its touch before it faded in a shimmer of golden dust.
 
 
-“A song, Kotyr, if you will,” Tilia asked. She settled beside Bern against the great tree’s silver trunk.Kotyr listened to the music of the phoenix above. It reminded him of his dream of Heaven, and he wondered what hidden meaning it held. He wondered whether it was the Goddess who’d sent it. He wondered whether she would return, and what form she might take. Spring, he hoped.
+“A song, Kotyr, if you will,” Tilia asked. She settled beside Bern against the great tree’s silver trunk.
+
+
+Kotyr listened to the music of the phoenix above. It reminded him of his dream of Heaven, and he wondered what hidden meaning it held. He wondered whether it was the Goddess who’d sent it. He wondered whether she would return, and what form she might take. Spring, he hoped.
 
 
 Then he closed his eyes, holding his lute, and from those strings he coaxed an aimless, wandering tune.
